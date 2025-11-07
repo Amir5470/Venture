@@ -19,4 +19,4 @@ Thumbs.db
 
 # optional env files
 .env
-firebasesecrets.txt
+secrets.js

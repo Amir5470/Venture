@@ -2,45 +2,52 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Venture | Login</title>
-    <link rel="stylesheet" href="./styles/Login.css">
+    <link rel="stylesheet" href="./styles/Login.css" />
 </head>
 
 <body>
     <div class="login-box">
         <h2>Venture Login</h2>
-        <!-- Checkbox to switch between login and register-->
-        <label class="switch">
-            <input type="checkbox">
-            <span class="slider round"></span>
-        </label>
-        <!--Enter email and pass for login mode -->
-        <div id="userpassfield">
-            <label for="username">Enter Email: </label>
-            <input type="text" name="email" id="email" placeholder="ie: cheesechomper@example.com">
-            <label for="password">Enter Password: </label>
-            <input type="password" name="password" id="password" placeholder="ie: password123">
+
+        <!-- toggle login/register -->
+        <div class="toggle-box">
+            <label class="switch">
+                <input type="checkbox" id="modeSwitch" />
+                <span class="slider"></span>
+            </label>
         </div>
-        <button type="submit" class="button" id="submitform">Submit</button>
 
+        <!-- email + pass -->
+        <div id="userpassfield">
+            <label for="email" style="text-align: left;">Email</label>
+            <input type="text" id="email" placeholder="ie: cheesechomper@example.com" />
+            <label for="password" style="text-align: left;">Password</label>
+            <input type="password" id="password" placeholder="ie: password123" />
+        </div>
 
-        <!--Sign in with other providers-->
+        <button type="submit" class="login-btn" id="submitform">Submit</button>
+
+        <!-- divider -->
         <div id="linebox">
             <div class="line"></div>
-            <p>Or Sign In With</p>
+            <p>or sign in with</p>
             <div class="line"></div>
         </div>
 
-        <button id="GoogleBtn" class="google-btn">
-            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo">
-            <span>Sign in with Google</span>
+        <!-- oauth buttons -->
+        <button id="GoogleBtn" class="oauth-btn google">
+            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo" />
+            <span>Google</span>
         </button>
-        <button id="GithubBtn" class="google-btn">
-            <img src="https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png" alt="Github logo">
-            <span>Sign in with Github</span>
+
+        <button id="GithubBtn" class="oauth-btn github">
+            <img src="https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png" alt="GitHub logo" />
+            <span>GitHub</span>
         </button>
+
         <p class="error" id="error"></p>
     </div>
 

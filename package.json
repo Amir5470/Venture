@@ -1,7 +1,7 @@
 {
   "name": "venture",
   "version": "1.0.0",
-  "description": "simple electron chat app",
+  "description": "Chat app made fully on electron. It is used for chatting with friends online, and it is built primarily in HTML, CSS, and JavaScript.",
   "keywords": [],
   "homepage": "https://github.com/Amir5470/Venture#readme",
   "bugs": {

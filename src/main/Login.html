@@ -11,13 +11,28 @@
 <body>
     <div class="login-box">
         <h2>Venture Login</h2>
+        <!-- Checkbox to switch between login and register-->
+        <label class="switch">
+            <input type="checkbox">
+            <span class="slider round"></span>
+        </label>
+        <!--Enter email and pass for login mode -->
         <div id="userpassfield">
-            <label for="username">Enter Username: </label>
-            <input type="text" name="username" id="username" placeholder="ie: HallowMaster546">
+            <label for="username">Enter Email: </label>
+            <input type="text" name="email" id="email" placeholder="ie: cheesechomper@example.com">
             <label for="password">Enter Password: </label>
             <input type="password" name="password" id="password" placeholder="ie: password123">
         </div>
         <button type="submit" class="button" id="submitform">Submit</button>
+
+
+        <!--Sign in with other providers-->
+        <div id="linebox">
+            <div class="line"></div>
+            <p>Or Sign In With</p>
+            <div class="line"></div>
+        </div>
+
         <button id="GoogleBtn" class="google-btn">
             <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo">
             <span>Sign in with Google</span>

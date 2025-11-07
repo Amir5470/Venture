@@ -1,0 +1,128 @@
+@import url('https://fonts.googleapis.com/css2?family=BBH+Sans+Bartle&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+* {
+    font-family: 'Open Sans', sans-serif, serif, 'Nunito Sans';
+}
+
+:root {
+    --tan: #ededed;
+    --gray: #77777a;
+    --accent: #4285f4;
+    --jetblack: #0E0E10;
+    --cloudwhite: #F4FAFC;
+    --online: #99D590;
+    --endchat: #ea4335;
+}
+
+body {
+    box-sizing: border-box;
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+}
+
+#wrapper {
+    display: flex;
+    flex-direction: row;
+    margin: 0;
+}
+
+#left {
+    background-color: var(--tan);
+    height: 97.8vh;
+    width: 45vh;
+    border: none;
+    padding: 10px;
+    margin: 0;
+    flex-direction: column;
+}
+
+#friend-btns {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 10px;
+    margin: 5px;
+    width: 90%;
+    height: 30px;
+    gap: 10px;
+}
+
+#friend-btns div {
+    height: 30px;
+    width: 35%;
+    margin: 0;
+    padding: 10px;
+    text-align: center;
+    background-color: var(--accent);
+    color: var(--tan);
+    border-radius: 20px;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#friend-btns div:hover {
+    cursor: pointer;
+    background-color: #525050;
+    transform: scale(1.05);
+}
+
+#friendstitle {
+    justify-self: center;
+    font-size: 48.1px;
+    padding: 0;
+    margin-bottom: 10px;
+    color: var(--accent);
+} 
+
+#friends-list {
+    justify-self: center;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+}
+
+#right {
+    background-color: var(--cloudwhite);
+    height: 97.8vh;
+    width: 70.5vw;
+    border: none;
+    padding: 20px;
+    margin: 0;
+}
+
+#user-search {
+    width: 90%;
+    height: 50px;
+    border-radius: 50px;
+    padding-left: 10px;
+}
+
+#search-button {
+    width: 25px;
+    height: 25px;
+}
+
+.button {
+    height: 50px;
+    width: 50px;
+    margin-left: 10px;
+    padding: 10px;
+    text-align: center;
+    background-color: #ededed;
+    color: var(--tan);
+    border-radius: 50px;
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#Outer-friends-search {
+    display: flex;
+    flex-direction: row;
+}

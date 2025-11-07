@@ -1,0 +1,21 @@
+# node stuff
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# electron build outputs
+dist/
+out/
+release/
+
+# OS stuff
+.DS_Store
+Thumbs.db
+
+# vscode stuff
+.vscode/
+
+# optional env files
+.env

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venture | Homepage</title>
+    <link rel="stylesheet" href="styles/Style.css?v=<%= Date.now() %>">
+</head>
+
+<body>
+    <div id="wrapper">
+        <div id="left">
+            <h1 id="friendstitle">Friends</h1>
+            <div id="friend-btns">
+                <div id="add-friend">Add Friend</div>
+                <div id="remove-friend">Remove Friend</div>
+            </div>
+            <div id="friends-list">
+                <div id="friend" style="display: none">
+                    <h1>Friend_Name</h1>
+                    <div id="status"></div>
+                </div>
+            </div>
+        </div>
+        <div id="right">
+            <div id="Outer-friends-search">
+                <input id="user-search" type="text" placeholder="Search for a user...">
+                <button id="search-users" class="button" ><img id="search-button" src="../../resources/magnifying-glass (1).png" alt="search"></button> 
+            </div>
+        </div>
+        <script src="script/Script.js"></script>
+</body>
+</html>

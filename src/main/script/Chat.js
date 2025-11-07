@@ -25,6 +25,16 @@ onAuthStateChanged(auth, user => {
     }
 })
 
+msgInput.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+            const text = msgInput.value.trim()
+        if (text && uid) {
+            push(ref(db, "messages"), { name: username, text, uid })
+            msgInput.value = ""
+        }
+    }
+    });
+
 sendBtn.onclick = () => {
     const text = msgInput.value.trim()
     if (text && uid) {

@@ -23,7 +23,7 @@ body {
     padding: 30px;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: first baseline;
     min-height: 100vh;
 }
 
@@ -34,8 +34,9 @@ body {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 30px;
     padding: 20px;
+    height: 800px;
 }
 
 #name,
@@ -59,7 +60,9 @@ body {
 #buttons {
     display: flex;
     justify-content: space-between;
+    flex-wrap: wrap;
     margin-top: 5px;
+    justify-self: flex-end;
 }
 
 #send,
@@ -73,6 +76,7 @@ body {
     color: white;
     border-radius: 25px;
     transition: all .2s ease;
+    width: calc(50% - 10px);
 }
 
 #send {
@@ -93,7 +97,8 @@ body {
 
 #chat {
     width: 100%;
-    min-height: 350px;
+    min-height: 500px;
+    max-height: 500px;
     background: white;
     border-radius: 20px;
     padding: 15px;
@@ -126,6 +131,22 @@ body {
     border-bottom-left-radius: 4px;
 }
 
+#logout {
+    width: 100%;
+    margin-top: 10px;
+    text-align: center;
+    padding: 10px;
+    border: 2px solid var(--gray);
+    border-radius: 25px;
+}
+
+#logout:hover {
+    cursor: pointer;
+    background: var(--gray);
+    color: white;
+    transition: all 0.2s ease-in-out;
+}
+
 @keyframes pop {
     0% {
         transform: scale(.8);
@@ -135,5 +156,11 @@ body {
     100% {
         transform: scale(1);
         opacity: 1;
+    }
+}
+
+@media (max-width: 400px) {
+    #chat {
+        height: 300px;
     }
 }

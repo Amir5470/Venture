@@ -7,11 +7,13 @@ const app = initializeApp(firebaseConfig)
 const db = getDatabase(app)
 const auth = getAuth(app)
 
+const usern = document.getElementById("Username")
 const msgInput = document.getElementById("msg")
 const chat = document.getElementById("chat")
 const sendBtn = document.getElementById("send")
 const clearBtn = document.getElementById("clearbtn")
 const logoutBtn = document.getElementById("logout")
+const chatContainer = document.getElementById('chat')
 
 let username = "anon"
 let uid = null
@@ -25,21 +27,38 @@ onAuthStateChanged(auth, user => {
     }
 })
 
-msgInput.addEventListener('keydown', function(event) {
+document.addEventListener('keydown', function (event) {
+    if ((event.ctrlKey || event.metaKey) && event.shiftKey && event.key.toLowerCase() === 'o') {
+        event.preventDefault();
+        remove(ref(db, "messages"))
+            .then(() => console.log("Messages cleared"))
+            .catch(err => console.error("Error clearing messages:", err));
+    }
+});
+
+msgInput.addEventListener('keydown', function (event) {
     if (event.key === 'Enter') {
-            const text = msgInput.value.trim()
+        const text = msgInput.value.trim()
         if (text && uid) {
             push(ref(db, "messages"), { name: username, text, uid })
             msgInput.value = ""
         }
     }
-    });
+    setTimeout(() => {
+
+    }, 0)
+
+});
 
 sendBtn.onclick = () => {
     const text = msgInput.value.trim()
     if (text && uid) {
         push(ref(db, "messages"), { name: username, text, uid })
         msgInput.value = ""
+        setTimeout(() => {
+
+        }, 0)
+
     }
 }
 
@@ -52,7 +71,17 @@ onValue(ref(db, "messages"), snap => {
         bubble.textContent = `${data.name}: ${data.text}`
         chat.appendChild(bubble)
     })
+    chatContainer.scrollTo({
+        top: chatContainer.scrollHeight,
+        behavior: 'instant'
+    })
 })
+
+
+
 
 clearBtn.onclick = () => remove(ref(db, "messages"))
 logoutBtn.onclick = () => signOut(auth)
+
+
+

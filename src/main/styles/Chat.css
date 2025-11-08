@@ -91,14 +91,21 @@ body {
     background: #2a64d9;
 }
 
+#send:active {
+    background-color: #183264;
+}
+
 #clearbtn:hover {
     background: #c93428;
 }
 
+#clearbtn:active {
+    background-color: #8b231f;
+}
+
 #chat {
     width: 100%;
-    min-height: 500px;
-    max-height: 500px;
+    height: 500px;
     background: white;
     border-radius: 20px;
     padding: 15px;
@@ -150,7 +157,7 @@ body {
 @keyframes pop {
     0% {
         transform: scale(.8);
-        opacity: 0;
+        opacity: .5;
     }
 
     100% {
@@ -163,4 +170,74 @@ body {
     #chat {
         height: 300px;
     }
+}
+
+.typing-dots {
+    display: flex;
+    gap: 5px;
+    margin-left: 10px;
+}
+
+.typing-dots span {
+    width: 8px;
+    height: 8px;
+    background: #4285f4;
+    border-radius: 50%;
+    animation: bounce 1s infinite;
+}
+
+.typing-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+
+    0%,
+    80%,
+    100% {
+        transform: scale(0);
+    }
+
+    40% {
+        transform: scale(1);
+    }
+}
+
+.reply-preview {
+    font-size: 13px;
+    padding: 5px 10px;
+    border-radius: 12px;
+    margin-bottom: 5px;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(5px);
+    color: #000;
+}
+
+.bubble .reply-preview {
+    background: rgba(255,255,255,0.9);
+    font-weight: 600;
+}
+
+.typing-dots {
+    display: flex;
+    gap: 5px;
+    margin-left: 10px;
+}
+.typing-dots span {
+    width: 8px;
+    height: 8px;
+    background: #4285f4;
+    border-radius: 50%;
+    animation: bounce 1s infinite;
+}
+.typing-dots span:nth-child(2){ animation-delay:0.2s; }
+.typing-dots span:nth-child(3){ animation-delay:0.4s; }
+
+@keyframes bounce{
+    0%,80%,100%{ transform:scale(0); }
+    40%{ transform:scale(1); }
 }

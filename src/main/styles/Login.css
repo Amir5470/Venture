@@ -100,7 +100,10 @@ body {
 }
 
 #email,
-#password {
+#password,
+#Usernameinput,
+#Emailinput,
+#Passinput {
     width: 200%;
     height: 35px;
     border-radius: 6px;
@@ -110,12 +113,16 @@ body {
 }
 
 #email:focus,
-#password:focus {
+#password:focus,
+#Usernameinput:focus,
+#Emailinput:focus,
+#Passinput:focus {
     border-color: var(--accent);
 }
 
 /* login button */
-.login-btn {
+.login-btn,
+#registerBtn {
     height: 40px;
     width: 140px;
     background-color: var(--accent);
@@ -131,7 +138,8 @@ body {
     transition: transform 0.1s ease-in-out;
 }
 
-.login-btn:hover {
+.login-btn:hover,
+#registerBtn:hover {
     background-color: #2b6fe4;
     transform: scale(1.03);
 }
@@ -183,6 +191,7 @@ body {
     background: #f1f3f4;
     box-shadow: none;
 }
+
 /* error text */
 .error {
     color: var(--endchat);
@@ -196,8 +205,6 @@ body {
     transform: rotate(-30deg);
 }
 
-
-
 #headerbox {
     display: flex;
     flex-direction: row;
@@ -205,4 +212,13 @@ body {
     justify-content: center;
     align-items: center;
     margin-right: 50px;
+}
+
+#signuppage {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    text-align: left;
 }

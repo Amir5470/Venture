@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Venture | Homepage</title>
     <link rel="stylesheet" href="styles/Style.css?v=<%= Date.now() %>">
+    <link rel="icon" href="resources/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="resources/favicon.ico" type="image/x-icon">
+
+
 </head>
 
 <body>
@@ -26,9 +30,12 @@
         <div id="right">
             <div id="Outer-friends-search">
                 <input id="user-search" type="text" placeholder="Search for a user...">
-                <button id="search-users" class="button" ><img id="search-button" src="../../resources/magnifying-glass (1).png" alt="search"></button> 
+                <button id="search-users" class="button"><img id="search-button"
+                        src="resources/magnifying-glass (1).png" alt="search"></button>
             </div>
+            <div id="results-container"></div>
         </div>
-        <script src="script/Script.js"></script>
+        <script type="module" src="script/Script.js"></script>
 </body>
+
 </html>

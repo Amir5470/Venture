@@ -32,7 +32,7 @@ body {
     gap: 15px;
     align-items: center;
     text-align: center;
-    height: 650px;
+    max-height: auto;
 }
 
 .login-box h2 {
@@ -93,7 +93,7 @@ body {
 #userpassfield {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
     justify-content: center;
     align-items: center;
     text-align: left;
@@ -104,7 +104,7 @@ body {
 #Usernameinput,
 #Emailinput,
 #Passinput {
-    width: 200%;
+    width: 170%;
     height: 35px;
     border-radius: 6px;
     border: 1px solid #ccc;
@@ -136,6 +136,7 @@ body {
     font-weight: 600;
     border: none;
     transition: transform 0.1s ease-in-out;
+    margin: 20px;
 }
 
 .login-btn:hover,

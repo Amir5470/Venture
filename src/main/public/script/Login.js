@@ -32,12 +32,12 @@ modeSwitch.addEventListener('change', () => {
     if (modeSwitch.checked) {
         loginPage.style.display = 'none'
         signupPage.style.display = 'flex'
-        headername.textcontent = "Register for Venture"
+        headername.textContent = "Register for Venture"
 
     } else {
         loginPage.style.display = 'flex'
         signupPage.style.display = 'none'
-        headername.textcontent = "Login to Venture"
+        headername.textContent = "Login to Venture"
     }
 })
 

@@ -50,7 +50,7 @@ body {
 
 #friend-btns div {
     height: 30px;
-    width: 35%;
+    width: 20%;
     margin: 0;
     padding: 10px;
     text-align: center;
@@ -61,6 +61,12 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+#line {
+    width: 200px;
+    height: 1px;
+    background: var(--accent);
 }
 
 #friend-btns div:hover {
@@ -75,7 +81,7 @@ body {
     padding: 0;
     margin-bottom: 10px;
     color: var(--accent);
-} 
+}
 
 #friends-list {
     justify-self: center;

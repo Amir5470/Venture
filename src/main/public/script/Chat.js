@@ -27,7 +27,7 @@ onAuthStateChanged(auth, user => {
         uid = user.uid
         userDisplay.textContent = `Welcome Back, ${username}`
     } else {
-        window.location.href = "./Login.html"
+        window.location.href = "./index.html"
     }
 })
 

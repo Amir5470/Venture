@@ -14,7 +14,7 @@
   "license": "MIT",
   "author": "Amirm5470 & JohnkLewisss",
   "type": "commonjs",
-  "main": "src/main/script/main.js",
+  "main": "src/main/public/script/main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron ."

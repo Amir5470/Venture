@@ -83,14 +83,23 @@ window.addEventListener('DOMContentLoaded', () => {
                         <button id="pf-search-back">Back to Search</button>
                     </div>
                 `;
+
+                const addFriendBtn = document.getElementById("add-friend");
+                addFriendBtn.addEventListener("click", () => {
+                    alert("Friend request sent!");
+                });
+
+                const messageFriendBtn = document.getElementById("message-friend");
+                messageFriendBtn.addEventListener("click", () => {
+                    window.location.href = "chat.html?user=" + encodeURIComponent(user.username);
+                });
             });
         });
     };
 
-    // delegated back button click
     resultsContainer.addEventListener('click', e => {
         if (e.target.id === 'pf-search-back') {
-            handleSearch(); // or store last results if u want persistent
+            handleSearch();
         }
     });
 

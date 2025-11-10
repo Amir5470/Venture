@@ -42,9 +42,10 @@ body {
 #friend-btns {
     display: flex;
     flex-direction: row;
-    justify-content: space-evenly;
+    justify-content: center;
     padding: 10px;
     margin: 5px;
+    margin-bottom: 15px;
     width: 90%;
     height: 30px;
     gap: 10px;
@@ -229,6 +230,7 @@ body {
 }
 
 #pf-search-back {
+    margin-top: 10px;
     margin-bottom: 10px;
     color: var(--accent);
     cursor: pointer;

@@ -3,7 +3,6 @@
 A simple chat application built with Electron, Firebase and modern web tech.
 
 ## 🧩 Features
-
 - Sign up/login with Google, GitHub or email & password  
 - Real-time chat interface  
 - User profiles & friend list  
@@ -11,7 +10,6 @@ A simple chat application built with Electron, Firebase and modern web tech.
 - Cross-platform desktop app via Electron  
 
 ## 🔧 Tech Stack
-
 - **Frontend**: HTML, CSS, JavaScript  
 - **Desktop wrapper**: Electron  
 - **Backend / Auth / Hosting**: Firebase (Auth, Firestore, Hosting)  
@@ -29,49 +27,58 @@ A simple chat application built with Electron, Firebase and modern web tech.
 git clone https://github.com/Amir5470/Venture.git
 cd Venture
 npm install
-Setup
-Copy secrets.js.example (or whatever your config file is) to secrets.js
+````
 
-Populate it with your Firebase config & OAuth client IDs
+### Setup
 
-In Firebase Console → Authentication → Authorized domains, add your hosting domain
+1. Copy `secrets.js.example` (or whatever your config file is) to `secrets.js`
+2. Add your Firebase config & OAuth client IDs
+3. In Firebase Console → Authentication → Authorized domains, add your hosting domain
+4. In GitHub/OAuth providers, ensure redirect URI matches your hosting handler
 
-In GitHub/OAuth providers, ensure redirect URI matches your hosting handler
+### Run locally (Electron)
 
-Run locally (for Electron) with:
-
-bash
-
+```bash
 npm start
-Build for production:
+```
 
-bash
+### Build for production
 
+```bash
 npm run build
-Deployment
-Hosted at: https://venture-chat.firebaseapp.com/
+```
+
+## 🚢 Deployment
+
+Hosted at: [https://venture-chat.firebaseapp.com/](https://venture-chat.firebaseapp.com/)
 To deploy:
 
-bash
+```bash
 firebase deploy
-📁 Project Structure
-css
+```
+
+## 📁 Project Structure
+
+```
 /src
-  /main
-    (Electron main process code)
-  /public
-    (HTML, CSS, JS for UI)
+  /main        (Electron main process code)
+  /public      (HTML, CSS, JS for UI)
 /.firebase
 .gitignore  
 package.json  
 firebase.json  
-🤝 Contributing
+```
+
+## 🤝 Contributing
+
 Feel free to open issues, suggest features, or submit pull requests.
-Please follow standard GitHub workflow (fork → branch → PR) and keep commits clean.
+Follow standard GitHub workflow (fork → branch → PR) and keep commits clean.
 
-✅ License
-This project is licensed under the MIT License. See LICENSE for details.
+## ✅ License
 
-📬 Contact
-Developed by Amir5470.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+## 📬 Contact
+
+Developed by **Amir5470**
 For questions or feedback, reach out via GitHub.

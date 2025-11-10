@@ -91,7 +91,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
                 const messageFriendBtn = document.getElementById("message-friend");
                 messageFriendBtn.addEventListener("click", () => {
-                    window.location.href = "chat.html?user=" + encodeURIComponent(user.username);
+                    window.location.href = "chat.html";
+                    const chatheader = document.getElementById("pf-search-h2");
+                    chatheader.textContent = `Chat with ${user.username}`;
                 });
             });
         });

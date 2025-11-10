@@ -251,29 +251,30 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 97.8vh;
+    height: 75vh;
     width: 100vw;
+    object-fit: cover;
     background-color: var(--cloudwhite);
 }
 
 #error-container {
     text-align: center;
-    padding: 40px 20px;
+    padding: 40px 30px;
     border-radius: 20px;
     background-color: var(--tan);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 20px;
-    max-width: 600px;
-    width: 50%;
-    gap: 0px;
-    height: 50%;
+    gap: 30px;
+    max-width: 500px;
+    width: 80%;
+    height: auto;
+    margin-top: 150px;
 }
 
 #error-code {
-    font-size: 180px;
+    font-size: 200px;
     font-weight: bold;
     color: var(--accent);
     position: relative;
@@ -283,11 +284,21 @@ body {
     overflow: hidden;
 }
 
+#logo-head {
+    position: absolute;
+    top: 60px;
+    left: 530px;
+}
+
+#logo-error {
+    margin-top: 10px;
+}
+
 .container {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100vh;
+    height: 30vh;
 }
 
 .segment {
@@ -295,14 +306,14 @@ body {
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    width: 300px;
-    height: 200px;
+    width: 350px;
+    height: 250px;
 }
 
 .glitch {
     position: relative;
-    font-size: 40px;
-    line-height: 1;
+    font-size: 24px;
+    line-height: 1.1;
 }
 
 .symbol {
@@ -310,26 +321,26 @@ body {
     top: 0;
     transform: translate(-50%, -50%) scale(3);
     white-space: nowrap;
-    letter-spacing: 10px;
-    text-indent: 10px;
+    letter-spacing: 12px;
+    text-indent: 12px;
     animation-name: symbol-move;
     animation-iteration-count: infinite;
+}
 
-    &.shallow {
-        left: 1px;
-        z-index: 2;
-        text-shadow: 1px 0 0 rgb(255, 0, 255);
-        animation-duration: 0.95s;
-    }
+.symbol.shallow {
+    left: 1px;
+    z-index: 2;
+    text-shadow: 1px 0 0 rgb(255, 0, 255);
+    animation-duration: 0.95s;
+}
 
-    &.deep {
-        left: 0;
-        z-index: 3;
-        text-shadow: 1px 0 0 var(--accent);
-        mix-blend-mode: darken;
-        animation-duration: 1.1s;
-        animation-delay: 0.2s;
-    }
+.symbol.deep {
+    left: 0;
+    z-index: 3;
+    text-shadow: 1px 0 0 var(--accent);
+    mix-blend-mode: darken;
+    animation-duration: 1.1s;
+    animation-delay: 0.2s;
 }
 
 .line {
@@ -342,131 +353,59 @@ body {
     animation: line-move 10s ease-out infinite;
 }
 
-.glitch.darken {
-    .symbol {
-        color: white;
-    }
+.glitch.darken .symbol {
+    color: white;
+}
 
-    .line {
-        background-color: black;
-    }
+.glitch.darken .line {
+    background-color: black;
 }
 
 @keyframes symbol-move {
-    10% {
-        top: -0.8px;
-        left: -2.2px;
-    }
-
-    20% {
-        top: 0.8px;
-        left: -0.4px;
-    }
-
-    30% {
-        left: 1px;
-    }
-
-    40% {
-        top: -0.6px;
-        left: -1.4px;
-    }
-
-    50% {
-        left: 0.4px;
-    }
-
-    60% {
-        top: 3.6px;
-        left: -2.4px;
-    }
-
-    70% {
-        top: -2px;
-        left: 0.2px;
-    }
-
-    80% {
-        top: -0.8px;
-        left: -1.8px;
-    }
-
-    90% {
-        left: 2.4px;
-    }
-
-    100% {
-        left: -2.4px;
-    }
+    10% { top: -0.8px; left: -2.2px; }
+    20% { top: 0.8px; left: -0.4px; }
+    30% { left: 1px; }
+    40% { top: -0.6px; left: -1.4px; }
+    50% { left: 0.4px; }
+    60% { top: 3.6px; left: -2.4px; }
+    70% { top: -2px; left: 0.2px; }
+    80% { top: -0.8px; left: -1.8px; }
+    90% { left: 2.4px; }
+    100% { left: -2.4px; }
 }
-
 
 @keyframes line-move {
-    0% {
-        top: -60px;
-    }
-
-    9% {
-        top: 25px;
-    }
-
-    14% {
-        top: -30px
-    }
-
-    18% {
-        top: 40px;
-    }
-
-    22% {
-        top: -25px;
-    }
-
-    32% {
-        top: 45px;
-    }
-
-    34% {
-        top: -10px;
-    }
-
-    40% {
-        top: 35px;
-    }
-
-    43% {
-        top: -25px;
-    }
-
-    99% {
-        top: 45px;
-    }
-
-    100% {
-        top: 60px
-    }
+    0% { top: -60px; }
+    9% { top: 25px; }
+    14% { top: -30px; }
+    18% { top: 40px; }
+    22% { top: -25px; }
+    32% { top: 45px; }
+    34% { top: -10px; }
+    40% { top: 35px; }
+    43% { top: -25px; }
+    99% { top: 45px; }
+    100% { top: 60px; }
 }
 
-
-
 #error-message {
-    font-size: 24px;
+    font-size: 28px;
     color: var(--jetblack);
-    margin: 20px;
+    margin: 30px 0;
 }
 
 #back-home {
     background-color: var(--accent);
     color: var(--tan);
     border: none;
-    padding: 15px 40px;
+    padding: 18px 45px;
     border-radius: 50px;
-    font-size: 16px;
+    font-size: 18px;
     cursor: pointer;
-    transition: all 0.2s ease-in-out;
+    transition: all 0.3s ease-in-out;
 }
 
 #back-home:hover {
     background-color: #525050;
-    transform: scale(1.05);
+    transform: scale(1.1);
 }

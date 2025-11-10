@@ -62,9 +62,14 @@ GoogleBtn.onclick = async () => {
     try {
         const res = await signInWithPopup(auth, googleProvider)
         await saveUserData(res.user)
-        window.location.href = "./home.html"
+        window.location.href = "/home.html"
     } catch (e) {
-        console.log(e)
+        if (e.code === 'auth/account-exists-with-different-credential') {
+            console.log('This Email is already used with another account!')
+            alert('This Email is already used with another account!')
+        } else {
+            console.log(e)
+        }
     }
 }
 
@@ -73,9 +78,14 @@ GithubBtn.onclick = async () => {
     try {
         const res = await signInWithPopup(auth, githubProvider)
         await saveUserData(res.user)
-        window.location.href = "./home.html"
+        window.location.href = "/home.html"
     } catch (e) {
-        console.log(e)
+        if (e.code === 'auth/account-exists-with-different-credential') {
+            console.log('This Email is already used with another account!')
+            alert('This Email is already used with another account!')
+        } else {
+            console.log(e)
+        }
     }
 }
 
@@ -86,9 +96,14 @@ submitform.onclick = async () => {
     try {
         const res = await signInWithEmailAndPassword(auth, emailVal, passVal)
         await saveUserData(res.user)
-        window.location.href = "./home.html"
+        window.location.href = "/home.html"
     } catch (e) {
-        console.log(e)
+        if (e.code === 'auth/account-exists-with-different-credential') {
+            console.log('This Email is already used with another account!')
+            alert('This Email is already used with another account!')
+        } else {
+            console.log(e)
+        }
     }
 }
 
@@ -101,9 +116,14 @@ registerBtn.onclick = async () => {
         const userCred = await createUserWithEmailAndPassword(auth, emailVal, passVal)
         await updateProfile(userCred.user, { displayName: username })
         await saveUserData(userCred.user)
-        window.location.href = "./home.html"
+        window.location.href = "/home.html"
     } catch (e) {
-        console.log(e)
+        if (e.code === 'auth/account-exists-with-different-credential') {
+            console.log('This Email is already used with another account!')
+            alert('This Email is already used with another account!')
+        } else {
+            console.log(e)
+        }
     }
 }
 
@@ -111,6 +131,6 @@ registerBtn.onclick = async () => {
 onAuthStateChanged(auth, user => {
     if (user) {
         saveUserData(user)
-        window.location.href = "./home.html"
+        window.location.href = "/home.html"
     }
 })

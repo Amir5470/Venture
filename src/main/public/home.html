@@ -8,8 +8,6 @@
     <link rel="stylesheet" href="styles/Style.css?v=<%= Date.now() %>">
     <link rel="icon" href="resources/favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="resources/favicon.ico" type="image/x-icon">
-
-
 </head>
 
 <body>
@@ -18,22 +16,29 @@
             <h1 id="friendstitle">Friends</h1>
             <div id="friends-list">
                 <div id="line"></div>
-                <a href="Chat.html">Chat Now</a>
+                <a href="Chat.html" style="margin: 10px;">Chat Now</a>
                 <div id="friend" style="display: none">
                     <h1>Friend_Name</h1>
                     <div id="status"></div>
                 </div>
             </div>
         </div>
+
         <div id="right">
             <div id="Outer-friends-search">
                 <input id="user-search" type="text" placeholder="Search for a user...">
                 <button id="search-users" class="button"><img id="search-button"
                         src="resources/magnifying-glass (1).png" alt="search"></button>
+                <button id="search-users" class="button" onclick=" window.location.href = './Settings.html'">
+                    <img id="search-button" src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png"alt="search">
+                </button>
             </div>
             <div id="results-container"></div>
         </div>
-        <script type="module" src="script/Script.js"></script>
+        <script type="module" src="script/Script.js">
+
+            window.location.href = "./home.html"
+        </script>
 </body>
 
 </html>

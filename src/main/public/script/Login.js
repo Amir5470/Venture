@@ -10,12 +10,14 @@ import {
     updateProfile,
     onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js"
+import { getFirestore, doc, setDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js"
+import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-messaging.js"
 import { firebaseConfig } from "./secrets.js"
 
 const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
 const fs = getFirestore(app)
+const messaging = getMessaging(app)
 
 // providers
 const googleProvider = new GoogleAuthProvider()
@@ -33,7 +35,6 @@ modeSwitch.addEventListener('change', () => {
         loginPage.style.display = 'none'
         signupPage.style.display = 'flex'
         headername.textContent = "Register for Venture"
-
     } else {
         loginPage.style.display = 'flex'
         signupPage.style.display = 'none'
@@ -41,6 +42,16 @@ modeSwitch.addEventListener('change', () => {
     }
 })
 
+// notif token saver
+async function saveToken(uid) {
+    Notification.requestPermission().then(async perm => {
+        if (perm === "granted") {
+            const token = await getToken(messaging, { vapidKey: "BAeBCiGsPIPQa3FE6-MndYWTmWbdgWVGmGMxChSTfG84FdzJlZKjRhfHdGlehetHvm5Cr7c5VYVBx9ypFulMVCU" })
+            const userRef = doc(fs, "users", uid)
+            await updateDoc(userRef, { tokens: arrayUnion(token) })
+        }
+    })
+}
 
 // save user to firestore
 async function saveUserData(user) {
@@ -58,6 +69,7 @@ GoogleBtn.onclick = async () => {
     try {
         const res = await signInWithPopup(auth, googleProvider)
         await saveUserData(res.user)
+        await saveToken(res.user.uid)
         window.location.href = "./home.html"
     } catch (e) {
         console.log(e)
@@ -69,6 +81,7 @@ GithubBtn.onclick = async () => {
     try {
         const res = await signInWithPopup(auth, githubProvider)
         await saveUserData(res.user)
+        await saveToken(res.user.uid)
         window.location.href = "./home.html"
     } catch (e) {
         console.log(e)
@@ -82,6 +95,7 @@ submitform.onclick = async () => {
     try {
         const res = await signInWithEmailAndPassword(auth, emailVal, passVal)
         await saveUserData(res.user)
+        await saveToken(res.user.uid)
         window.location.href = "./home.html"
     } catch (e) {
         console.log(e)
@@ -97,6 +111,7 @@ registerBtn.onclick = async () => {
         const userCred = await createUserWithEmailAndPassword(auth, emailVal, passVal)
         await updateProfile(userCred.user, { displayName: username })
         await saveUserData(userCred.user)
+        await saveToken(userCred.user.uid)
         window.location.href = "./home.html"
     } catch (e) {
         console.log(e)
@@ -105,12 +120,9 @@ registerBtn.onclick = async () => {
 
 // migrate old users on login
 onAuthStateChanged(auth, user => {
-    if (user) saveUserData(user)
-})
-
-onAuthStateChanged(auth, user => {
     if (user) {
         saveUserData(user)
+        saveToken(user.uid) // auto add token for old users if perm granted
         window.location.href = "./home.html"
     }
 })

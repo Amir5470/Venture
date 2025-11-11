@@ -41,14 +41,22 @@ window.addEventListener('DOMContentLoaded', () => {
     const handleSearch = async () => {
         const query = searchbar.value.trim().toLowerCase();
         if (!query) return;
+
         try {
             const snapshot = await getDocs(collection(db, "users"));
             const results = [];
-            snapshot.forEach(doc => {
-                const user = doc.data();
-                const username = (user.username || "").toLowerCase();
-                if (username.includes(query) || similarity(username, query) >= 0.6) results.push(user);
-            });
+            if (query === "all") {
+                snapshot.forEach(doc => {
+                    const user = doc.data();
+                    results.push(user);
+                });
+            } else {
+                snapshot.forEach(doc => {
+                    const user = doc.data();
+                    const username = (user.username || "").toLowerCase();
+                    if (username.includes(query) || similarity(username, query) >= 0.6) results.push(user);
+                });
+            }
             displayResults(results);
         } catch (err) {
             console.error(err);

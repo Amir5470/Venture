@@ -126,11 +126,3 @@ registerBtn.onclick = async () => {
         }
     }
 }
-
-// migrate old users on login
-onAuthStateChanged(auth, user => {
-    if (user) {
-        saveUserData(user)
-        window.location.href = "/home.html"
-    }
-})

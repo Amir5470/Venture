@@ -7,6 +7,11 @@
     padding: 0;
 }
 
+body {
+    box-sizing: border-box;
+    margin: 0;
+}
+
 :root {
     --tan: #ededed;
     --gray: #77777a;
@@ -18,22 +23,197 @@
 }
 
 header {
-    width: auto;
+    width: 98%;
     height: 100px;
-    display: flex; 
+    display: flex;
     flex-direction: row;
     border-radius: 20px;
     background-color: var(--tan);
-    margin: 2%;
+    margin: 1%;
     padding: 20px;
     gap: 10px;
     align-items: center;
 }
+
 header img {
     width: 50px;
     height: 50px;
     transform: rotate(-30deg);
 }
+
 header h2 {
     font-size: 30px;
+}
+
+#settings-tab-group {
+    background-color: var(--tan);
+    border-radius: 20px;
+    padding: 10px;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 20px;
+    width: 98%;
+    margin: 1%;
+}
+
+.settings-tab {
+    background-color: var(--gray);
+    border-radius: 10px;
+    width: 30%;
+    height: 40px;
+    transition: all 0.2s ease-in-out;
+    text-decoration: bold;
+    color: var(--cloudwhite);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.settings-tab:hover {
+    cursor: pointer;
+    background-color: var(--accent);
+    color: var(--cloudwhite);
+    transform: scale(1.03);
+}
+
+main {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 98%;
+    height: 400px;
+    margin: 1% 1% 0 1%;
+    background-color: var(--tan);
+    border-radius: 20px;
+    gap: 20px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+#profile-pic-wrapper {
+    width: 150px;
+    height: 150px;
+    border-radius: 75px;
+    overflow: hidden;
+    border: 4px solid var(--gray);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#profile-pic {
+    width: 145px;
+    height: 145px;
+    object-fit: cover;
+}
+
+#personal-info {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 50%;
+}
+
+#display-name p,
+#bio p {
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+#display-name-input,
+#bio-input {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid var(--gray);
+    border-radius: 10px;
+    font-size: 16px;
+    resize: none;
+}
+
+#edit-save-btns {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+    height: 40px;
+    height: 245px;
+}
+
+#display-name-input {
+    width: 600px;
+}
+
+
+#edit-profile-btn,
+#save-changes-btn {
+    background-color: var(--accent);
+    color: var(--cloudwhite);
+    padding: 10px 20px;
+    border-radius: 10px;
+    transition: all 0.2s ease-in-out;
+}
+
+#edit-profile-btn:hover,
+#save-changes-btn:hover {
+    background-color: var(--gray);
+    cursor: pointer;
+    transform: scale(1.05);
+}
+
+#edit-save-btns {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    margin-bottom: 30px;
+    align-items: flex-start;
+}
+
+#logout-wrapper {
+    justify-self: center;
+    margin-right: 1%;
+    margin-left: 1%;
+    margin-bottom: 50px;
+    margin-top: 0;
+    display: flex;
+    justify-content: center;
+    background-color: var(--endchat);
+    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 20px;
+    width: 98%;
+    height: 50px;
+    color: var(--cloudwhite);
+}
+
+#logout-button {
+    color: var(--cloudwhite);
+    border-radius: 10px;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    background-color: var(--endchat);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    font-size: 24px;
+    letter-spacing: 1px;
+    width: 100%;
+    height: 50px;
+    font-weight: 700;
+    text-align: center;
+}
+
+#logout-wrapper:hover {
+    height: 60px;
+    cursor: pointer;
+    transition: all 0.2s ease-out;
+}
+
+#logout-button h4 {
+    margin-top: 0;
+    margin-bottom: 0;
 }

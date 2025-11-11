@@ -1,23 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Venture | Settings</title>
     <link rel="stylesheet" href="styles/settings.css">
+    <style>
+        #bio-input {
+            width: 600px;
+            height: 200px;
+            padding-top: 5px;
+            resize: none;
+            overflow-y: auto;
+            vertical-align: top;
+            text-align: left;
+        }
+    </style>
 </head>
+
 <body>
     <header>
         <a href="home.html"><img src="resources/V-BGremoved.png"></a>
-        <h2 style="text-align:center;color:#4285f4;">Settings</h2>
+        <h2 style="text-align:center; color:#4285f4;">Settings</h2>
     </header>
-    <div> 
-
-    </div>
-    <div>
-
-    </div>
+    <section id="settings-tab-group">
+        <div class="settings-tab" id="profile-tab">
+            <h3>Profile</h3>
+        </div>
+        <div class="settings-tab" id="account-tab">
+            <h3>Account</h3>
+        </div>
+        <div class="settings-tab" id="appearance-tab">
+            <h3>Appearance</h3>
+        </div>
+    </section>
+    <main>
+        <div id="profile-pic-wrapper">
+            <a href=""><img id="profile-pic" src="resources/anonymous.png" alt="Profile Picture"></a>
+        </div>
+        <div id="personal-info">
+            <div id="display-name">
+                <p>Display name:</p>
+                <input type="text" id="display-name-input" maxlength="30" placeholder="ie: Cheesegobbler26">
+            </div>
+            <div id="bio">
+                <p>Add your bio/description:</p>
+                <textarea id="bio-input" maxlength="150" placeholder="Tell a little about yourself..."></textarea>
+            </div>
+        </div>
+        <div id="edit-save-btns">
+            <div id="edit-profile-btn">
+                <h4>Edit Profile</h4>
+            </div>
+            <div id="save-changes-btn">
+                <h4>Save Changes</h4>
+            </div>
+        </div>
+    </main>
+    <section id="logout-wrapper">
+        <div id="logout-button">
+            <h4>Log out</h4>
+        </div>
+    </section>
     <footer></footer>
     <script src="settings.js"></script>
 </body>
+
 </html>

@@ -4,12 +4,7 @@
     box-sizing: border-box;
     font-family: 'Nunito Sans', sans-serif;
     margin: 0;
-    padding: 0;
-}
-
-body {
-    box-sizing: border-box;
-    margin: 0;
+    padding: 0
 }
 
 :root {
@@ -19,78 +14,77 @@ body {
     --jetblack: #0e0e10;
     --cloudwhite: #f4fafc;
     --online: #99d590;
-    --endchat: #ea4335;
+    --endchat: #ea4335
+}
+
+body {
+    margin: 0
+}
+
+header,
+#settings-tab-group,
+main,
+#logout-wrapper {
+    border-radius: 20px;
+    margin: 1%;
+    width: 98%;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    background: var(--tan)
 }
 
 header {
-    width: 98%;
     height: 100px;
-    display: flex;
     flex-direction: row;
-    border-radius: 20px;
-    background-color: var(--tan);
-    margin: 1%;
-    padding: 20px;
-    gap: 10px;
-    align-items: center;
+    padding: 20px
 }
 
 header img {
     width: 50px;
     height: 50px;
-    transform: rotate(-30deg);
+    transform: rotate(-30deg)
 }
 
 header h2 {
-    font-size: 30px;
+    font-size: 30px
 }
 
 #settings-tab-group {
-    background-color: var(--tan);
-    border-radius: 20px;
-    padding: 10px;
-    display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
     justify-content: space-between;
-    gap: 20px;
-    width: 98%;
-    margin: 1%;
+    gap: 20px
 }
 
 .settings-tab {
-    background-color: var(--gray);
+    background: var(--gray);
     border-radius: 10px;
     width: 30%;
     height: 40px;
-    transition: all 0.2s ease-in-out;
-    text-decoration: bold;
     color: var(--cloudwhite);
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: all .2s;
+    font-weight: bold
 }
 
 .settings-tab:hover {
     cursor: pointer;
-    background-color: var(--accent);
-    color: var(--cloudwhite);
-    transform: scale(1.03);
+    background: var(--accent);
+    transform: scale(1.03)
 }
 
 main {
-    display: flex;
     flex-direction: row;
     justify-content: space-evenly;
     align-items: center;
-    width: 98%;
     height: 400px;
-    margin: 1% 1% 0 1%;
-    background-color: var(--tan);
-    border-radius: 20px;
+    margin-top: 0;
     gap: 20px;
-    border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0
 }
 
 #profile-pic-wrapper {
@@ -100,27 +94,27 @@ main {
     overflow: hidden;
     border: 4px solid var(--gray);
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center
 }
 
 #profile-pic {
     width: 145px;
     height: 145px;
-    object-fit: cover;
+    object-fit: cover
 }
 
 #personal-info {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    width: 50%;
+    width: 50%
 }
 
 #display-name p,
 #bio p {
     font-size: 18px;
-    margin-bottom: 5px;
+    margin-bottom: 5px
 }
 
 #display-name-input,
@@ -130,39 +124,11 @@ main {
     border: 2px solid var(--gray);
     border-radius: 10px;
     font-size: 16px;
-    resize: none;
-}
-
-#edit-save-btns {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    align-items: center;
-    height: 40px;
-    height: 245px;
+    resize: none
 }
 
 #display-name-input {
-    width: 600px;
-}
-
-
-#edit-profile-btn,
-#save-changes-btn {
-    background-color: var(--accent);
-    color: var(--cloudwhite);
-    padding: 10px 20px;
-    border-radius: 10px;
-    transition: all 0.2s ease-in-out;
-}
-
-#edit-profile-btn:hover,
-#save-changes-btn:hover {
-    background-color: var(--gray);
-    cursor: pointer;
-    transform: scale(1.05);
+    width: 600px
 }
 
 #edit-save-btns {
@@ -171,49 +137,60 @@ main {
     gap: 10px;
     margin-bottom: 30px;
     align-items: flex-start;
+    height: 245px
+}
+
+#edit-profile-btn,
+#save-changes-btn {
+    background: var(--accent);
+    color: var(--cloudwhite);
+    padding: 10px 20px;
+    border-radius: 10px;
+    transition: all .2s
+}
+
+#edit-profile-btn:hover,
+#save-changes-btn:hover {
+    background: var(--gray);
+    cursor: pointer;
+    transform: scale(1.05)
 }
 
 #logout-wrapper {
-    justify-self: center;
-    margin-right: 1%;
-    margin-left: 1%;
-    margin-bottom: 50px;
-    margin-top: 0;
     display: flex;
     justify-content: center;
-    background-color: var(--endchat);
-    border-bottom-right-radius: 20px;
-    border-bottom-left-radius: 20px;
+    margin: 0 1% 50px;
     width: 98%;
     height: 50px;
-    color: var(--cloudwhite);
-}
-
-#logout-button {
-    color: var(--cloudwhite);
-    border-radius: 10px;
-    transition: all 0.2s ease-in-out;
-    cursor: pointer;
-    background-color: var(--endchat);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 20px;
-    font-size: 24px;
-    letter-spacing: 1px;
-    width: 100%;
-    height: 50px;
-    font-weight: 700;
-    text-align: center;
+    background: var(--endchat);
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    color: var(--cloudwhite)
 }
 
 #logout-wrapper:hover {
     height: 60px;
     cursor: pointer;
-    transition: all 0.2s ease-out;
+    transition: all .2s ease-out
+}
+
+#logout-button {
+    width: 100%;
+    height: 50px;
+    background: var(--endchat);
+    color: var(--cloudwhite);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all .2s
 }
 
 #logout-button h4 {
-    margin-top: 0;
-    margin-bottom: 0;
+    margin: 0
 }

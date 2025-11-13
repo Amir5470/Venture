@@ -1,10 +1,33 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap');
 
 :root {
     --tan: #ededed;
     --accent: #4285f4;
+    --accent-hover: #2b6fe4;
+    --accent-dark: #183264;
     --cloudwhite: #f4fafc;
     --endchat: #ea4335;
+    --endchat-hover: #c93428;
+    --endchat-dark: #8b231f;
+    --dark-text: #202124;
+    --light-text: #5f6368;
+    --gray: #77777a;
+    --jetblack: #0e0e10;
+    --online: #99d590;
+    --white: #ffffff;
+    --border-color: #dadce0;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
+    --shadow-accent: 0 4px 12px rgba(66, 133, 244, 0.3);
+    --shadow-accent-light: 0 4px 12px rgba(66, 133, 244, 0.2);
+    --border-radius-sm: 10px;
+    --border-radius-md: 16px;
+    --border-radius-lg: 25px;
+    --border-radius-xl: 50px;
+    --transition-fast: all 0.2s ease;
+    --transition-base: all 0.3s ease;
+    --font-family: 'Nunito Sans', sans-serif;
 }
 
 * {
@@ -12,7 +35,7 @@
 }
 
 body {
-    font-family: 'Nunito Sans', sans-serif;
+    font-family: var(--font-family);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -20,12 +43,11 @@ body {
     background: var(--cloudwhite);
 }
 
-/* main box */
 .login-box {
     background: var(--tan);
     width: 400px;
-    border-radius: 25px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
     padding: 35px 25px;
     display: flex;
     flex-direction: column;
@@ -40,7 +62,6 @@ body {
     font-weight: 700;
 }
 
-/* toggle switch + text */
 .toggle-box {
     display: flex;
     align-items: center;
@@ -65,7 +86,7 @@ body {
     cursor: pointer;
     inset: 0;
     background-color: #ccc;
-    transition: 0.4s;
+    transition: var(--transition-base);
     border-radius: 40px;
 }
 
@@ -76,8 +97,8 @@ body {
     width: 32px;
     left: 4px;
     bottom: 4px;
-    background-color: white;
-    transition: 0.4s;
+    background-color: var(--white);
+    transition: var(--transition-base);
     border-radius: 50%;
 }
 
@@ -89,7 +110,6 @@ body {
     transform: translateX(160px);
 }
 
-/* email/pass fields */
 #userpassfield {
     display: flex;
     flex-direction: column;
@@ -120,32 +140,29 @@ body {
     border-color: var(--accent);
 }
 
-/* login button */
 .login-btn,
 #registerBtn {
     height: 40px;
     width: 140px;
     background-color: var(--accent);
     color: var(--tan);
-    border-radius: 20px;
-    transition: all 0.2s ease-in-out;
+    border-radius: var(--border-radius-lg);
+    transition: var(--transition-fast);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     font-weight: 600;
     border: none;
-    transition: transform 0.1s ease-in-out;
     margin: 20px;
 }
 
 .login-btn:hover,
 #registerBtn:hover {
-    background-color: #2b6fe4;
+    background-color: var(--accent-hover);
     transform: scale(1.03);
 }
 
-/* divider line */
 #linebox {
     display: flex;
     flex-direction: row;
@@ -160,13 +177,12 @@ body {
     background: var(--accent);
 }
 
-/* oauth buttons */
 .oauth-btn {
     width: 100%;
     height: 45px;
-    background: #fff;
+    background: var(--white);
     color: #3c4043;
-    border: 1px solid #dadce0;
+    border: 1px solid var(--border-color);
     border-radius: 6px;
     display: flex;
     align-items: center;
@@ -175,7 +191,7 @@ body {
     cursor: pointer;
     font-weight: 500;
     font-size: 15px;
-    transition: box-shadow 0.2s ease, background-color 0.2s ease;
+    transition: var(--transition-fast);
 }
 
 .oauth-btn img {
@@ -185,7 +201,7 @@ body {
 
 .oauth-btn:hover {
     background: #f8f9fa;
-    box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+    box-shadow: var(--shadow-md);
 }
 
 .oauth-btn:active {
@@ -193,7 +209,6 @@ body {
     box-shadow: none;
 }
 
-/* error text */
 .error {
     color: var(--endchat);
     font-size: 14px;

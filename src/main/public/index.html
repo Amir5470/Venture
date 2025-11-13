@@ -2,71 +2,120 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Venture | Login</title>
-    <link rel="stylesheet" href="./styles/Login.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venture - Real-Time Chat Application</title>
+    <meta name="description" content="Venture is a real-time chat application with instant messaging, Google & GitHub authentication, and customizable profiles. Start chatting directly in your browser.">
+    <link rel="stylesheet" href="./styles/landing.css">
     <link rel="icon" href="resources/favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="resources/favicon.ico" type="image/x-icon">
-
 </head>
 
 <body>
-    <div class="login-box">
-        <div id="headerbox">
-            <img alt="Venture Logo" src="resources/V-BGremoved.png" id="logov">
-            <h2 id="venture-login">Login to Venture</h2>
+    <header class="header">
+        <div class="container">
+            <div class="nav">
+                <div class="logo">
+                    <img src="resources/V-BGremoved.png" alt="Venture Logo">
+                    <span>Venture</span>
+                </div>
+                <a href="login.html" class="cta-button">Get Started</a>
+            </div>
         </div>
-        <!-- toggle login/register -->
-        <div class="toggle-box">
-            <label class="switch">
-                <input type="checkbox" id="modeSwitch" />
-                <span class="slider"></span>
-            </label>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>Connect Instantly with <span class="highlight">Venture</span></h1>
+                    <p class="hero-description">A real-time chat application built with pure web technologies. Experience seamless messaging directly in your browser with live updates and modern authentication.</p>
+                    <a href="login.html" class="cta-button primary">Start Chatting Now</a>
+                </div>
+                <div class="hero-image">
+                    <img src="resources/V-BGremoved.png" alt="Venture Chat Interface">
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="container">
+                <h2 class="section-title">Why Choose Venture?</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">⚡</div>
+                        <h3>Real-Time Messaging</h3>
+                        <p>Experience instant message delivery with live updates powered by Firebase Firestore. No delays, no refresh needed.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔐</div>
+                        <h3>Secure Authentication</h3>
+                        <p>Sign in seamlessly with Google, GitHub, or email authentication. Your security is our priority.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">👥</div>
+                        <h3>Friend Lists</h3>
+                        <p>Build and manage your network. Connect with friends and stay in touch effortlessly.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">✨</div>
+                        <h3>Customizable Profiles</h3>
+                        <p>Make it yours. Personalize your profile and express yourself the way you want.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🌐</div>
+                        <h3>Browser-Based</h3>
+                        <p>No downloads, no installations. Access Venture directly from your browser, anywhere, anytime.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🚀</div>
+                        <h3>Pure Web Tech</h3>
+                        <p>Built with HTML, CSS, and JavaScript. Fast, lightweight, and optimized for performance.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="tech-stack">
+            <div class="container">
+                <h2 class="section-title">Built with Modern Technologies</h2>
+                <div class="tech-list">
+                    <div class="tech-item">
+                        <span class="tech-name">HTML5</span>
+                    </div>
+                    <div class="tech-item">
+                        <span class="tech-name">CSS3</span>
+                    </div>
+                    <div class="tech-item">
+                        <span class="tech-name">JavaScript</span>
+                    </div>
+                    <div class="tech-item">
+                        <span class="tech-name">Firebase</span>
+                    </div>
+                    <div class="tech-item">
+                        <span class="tech-name">Firestore</span>
+                    </div>
+                    <div class="tech-item">
+                        <span class="tech-name">Firebase Hosting</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta-section">
+            <div class="container">
+                <h2>Ready to Start Chatting?</h2>
+                <p>Join Venture today and experience real-time communication at its finest.</p>
+                <a href="login.html" class="cta-button primary large">Get Started - It's Free</a>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Venture. A real-time chat application powered by Firebase.</p>
         </div>
-
-        <!-- email + pass -->
-        <div id="userpassfield">
-            <label for="email" style="text-align: left;">Email</label>
-            <input type="email" id="email" placeholder="ie: cheesechomper@example.com" />
-            <label for="password" style="text-align: left;">Password</label>
-            <input type="password" id="password" placeholder="ie: password123" />
-            <button type="submit" class="login-btn" id="submitform">Submit</button>
-        </div>
-
-
-        <div id="signuppage" style="display: none;">
-            <label for="Usernameinput">Username</label>
-            <input type="text" id="Usernameinput" placeholder="ie: CheeseChomper" />
-            <label for="Emailinput">Email</label>
-            <input type="email" id="Emailinput" placeholder="ie: cheesechomper@example.com">
-            <label for="Passinput">Password</label>
-            <input type="password" id="Passinput" placeholder="ie: password123">
-            <button id="registerBtn">Register</button>
-        </div>
-
-        <!-- divider -->
-        <div id="linebox">
-            <div class="line"></div>
-            <p>or sign in with</p>
-            <div class="line"></div>
-        </div>
-
-        <!-- oauth buttons -->
-        <button id="GoogleBtn" class="oauth-btn google">
-            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo" />
-            <span>Google</span>
-        </button>
-
-        <button id="GithubBtn" class="oauth-btn github">
-            <img src="https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png" alt="GitHub logo" />
-            <span>GitHub</span>
-        </button>
-
-        <p class="error" id="error"></p>
-    </div>
-
-    <script type="module" defer src="./script/Login.js"></script>
+    </footer>
 </body>
 
 </html>

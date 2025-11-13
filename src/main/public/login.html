@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Venture | Login</title>
+    <link rel="stylesheet" href="./styles/Login.css" />
+    <link rel="icon" href="resources/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="resources/favicon.ico" type="image/x-icon">
+
+</head>
+
+<body>
+    <div class="login-box">
+        <div id="headerbox">
+            <img alt="Venture Logo" src="resources/V-BGremoved.png" id="logov">
+            <h2 id="venture-login">Login to Venture</h2>
+        </div>
+        <!-- toggle login/register -->
+        <div class="toggle-box">
+            <label class="switch">
+                <input type="checkbox" id="modeSwitch" />
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <!-- email + pass -->
+        <div id="userpassfield">
+            <label for="email" style="text-align: left;">Email</label>
+            <input type="email" id="email" placeholder="ie: cheesechomper@example.com" />
+            <label for="password" style="text-align: left;">Password</label>
+            <input type="password" id="password" placeholder="ie: password123" />
+            <button type="submit" class="login-btn" id="submitform">Submit</button>
+        </div>
+
+
+        <div id="signuppage" style="display: none;">
+            <label for="Usernameinput">Username</label>
+            <input type="text" id="Usernameinput" placeholder="ie: CheeseChomper" />
+            <label for="Emailinput">Email</label>
+            <input type="email" id="Emailinput" placeholder="ie: cheesechomper@example.com">
+            <label for="Passinput">Password</label>
+            <input type="password" id="Passinput" placeholder="ie: password123">
+            <button id="registerBtn">Register</button>
+        </div>
+
+        <!-- divider -->
+        <div id="linebox">
+            <div class="line"></div>
+            <p>or sign in with</p>
+            <div class="line"></div>
+        </div>
+
+        <!-- oauth buttons -->
+        <button id="GoogleBtn" class="oauth-btn google">
+            <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo" />
+            <span>Google</span>
+        </button>
+
+        <button id="GithubBtn" class="oauth-btn github">
+            <img src="https://github.githubassets.com/assets/GitHub-Mark-ea2971cee799.png" alt="GitHub logo" />
+            <span>GitHub</span>
+        </button>
+
+        <p class="error" id="error"></p>
+    </div>
+
+    <script type="module" defer src="./script/Login.js"></script>
+</body>
+
+</html>

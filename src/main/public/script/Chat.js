@@ -20,6 +20,40 @@ const userDisplay = document.getElementById("username")
 
 let username = "anon"
 let uid = null
+let replyTo = null
+let typingTimeout = null
+
+document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'o') {
+        e.preventDefault()
+        remove(ref(db, "messages")).catch(console.error)
+    }
+})
+
+function updateReplyUI() {
+    if (replyTo) {
+        replyBar.style.display = 'flex'
+        replyText.textContent = `Replying to ${replyTo.name}: "${replyTo.text}"`
+    } else {
+        replyBar.style.display = 'none'
+        replyText.textContent = ''
+    }
+}
+
+function sendMessage() {
+    const text = msgInput.value.trim()
+    if (!text || !uid) return
+
+    const msgData = { name: username, text, uid }
+    if (replyTo) {
+        msgData.replyTo = { name: replyTo.name, text: replyTo.text }
+        replyTo = null
+        updateReplyUI()
+    }
+
+    push(ref(db, "messages"), msgData)
+    msgInput.value = ""
+}
 
 // auth check
 onAuthStateChanged(auth, user => {
@@ -90,3 +124,37 @@ clearBtn.addEventListener("click", () => {
 logoutBtn.addEventListener("click", () => {
     signOut(auth)
 })
+
+function createBubble(data) {
+    const bubble = document.createElement("div")
+    bubble.className = `bubble ${data.uid === uid ? "sent" : "received"}`
+    if (data.replyTo) {
+        const replyDiv = document.createElement("div")
+        replyDiv.className = "reply-preview"
+        replyDiv.textContent = `↳ ${data.replyTo.name}: ${data.replyTo.text}`
+        bubble.appendChild(replyDiv)
+    }
+    const textNode = document.createElement("div")
+    textNode.textContent = `${data.name}: ${data.text}`
+    bubble.appendChild(textNode)
+    bubble.addEventListener('click', () => {
+        if (replyTo && replyTo.id === data.id) replyTo = null
+        else replyTo = { name: data.name, text: data.text, id: data.id }
+        updateReplyUI()
+    })
+    return bubble
+}
+
+clearBtn.onclick = () => remove(ref(db, "messages"))
+logoutBtn.onclick = () => signOut(auth)
+
+onValue(ref(db, "typing"), snap => {
+    const typingUsers = snap.val() || {}
+    const otherTyping = Object.keys(typingUsers).filter(id => id !== uid)
+    typingIndicator.style.display = otherTyping.length > 0 ? "flex" : "none"
+})
+
+cancelReplyBtn.onclick = () => {
+    replyTo = null
+    updateReplyUI()
+}

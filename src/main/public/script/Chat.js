@@ -29,6 +29,26 @@ if (!msgInput || !chat || !sendBtn || !clearBtn || !logoutBtn || !userDisplay) {
     console.error("Missing one or more required DOM elements. Check IDs: msg, chat, send, clearbtn, logout, username")
 }
 
+function createBubble(data) {
+    const bubble = document.createElement("div")
+    bubble.className = `bubble ${data.uid === uid ? "sent" : "received"}`
+    if (data.replyTo) {
+        const replyDiv = document.createElement("div")
+        replyDiv.className = "reply-preview"
+        replyDiv.textContent = `↳ ${data.replyTo.name}: ${data.replyTo.text}`
+        bubble.appendChild(replyDiv)
+    }
+    const textNode = document.createElement("div")
+    textNode.textContent = `${data.name}: ${data.text}`
+    bubble.appendChild(textNode)
+    bubble.addEventListener('click', () => {
+        if (replyTo && replyTo.id === data.id) replyTo = null
+        else replyTo = { name: data.name, text: data.text, id: data.id }
+        updateReplyUI()
+    })
+    return bubble
+}
+
 // state
 let username = "anon"
 let uid = null

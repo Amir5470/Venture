@@ -71,15 +71,19 @@ let replyTo = null
 // helpers
 const safeSetDisplay = (el, value) => { if (!el) return; el.style.display = value }
 function updateReplyUI() {
-    if (!replyBar || !replyText) return
+    const replyBox = document.getElementById("replyBox")
+    const replyText = document.getElementById("replyText")
+
     if (!replyTo) {
-        safeSetDisplay(replyBar, "none")
+        replyBox.style.display = "none"
         replyText.textContent = ""
         return
     }
-    safeSetDisplay(replyBar, "flex")
-    replyText.textContent = `Replying to ${replyTo.name}: "${replyTo.text}"`
+
+    replyBox.style.display = "flex"
+    replyText.textContent = `${replyTo.name}: ${replyTo.text}`
 }
+
 
 async function registerPushTokenIfGranted(userId) {
     if (!messaging || !fs) return
@@ -170,38 +174,34 @@ onValue(ref(db, "messages"), snap => {
         const m = child.val() || {}
         const key = child.key
 
-        // attach id/key to the message object so other code can rely on it
-        try { m.id = m.id || key } catch (e) { /* noop */ }
+        // ensure stable id on message object
+        m.id = m.id || key
 
-        const div = document.createElement("div")
-        div.className = "msg"
-        // store key on element dataset for better click handling if needed
-        if (key) div.dataset.id = key
-
-        const time = m.time ? new Date(m.time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : ""
-
-        // normalize fields: some of your old code used user vs name
         const name = m.name || m.user || "anon"
         const text = m.text || ""
 
-        const replyHtml = m.replyTo ? `<div class="reply-preview">↳ ${escapeHtml(m.replyTo.name || "anon")}: ${escapeHtml(m.replyTo.text || "")}</div>` : ""
+        const bubble = createBubble({
+            name,
+            text,
+            uid: m.uid,
+            id: m.id,
+            replyTo: m.replyTo || null
+        })
 
-        div.innerHTML = `
-            <p>${escapeHtml(name)}: ${escapeHtml(text)}</p>
-            ${replyHtml}
-            <span class="timestamp">${escapeHtml(time)}</span>
-        `
+        // timestamp node
+        const time = m.time ? new Date(m.time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : ""
+        const timeSpan = document.createElement("span")
+        timeSpan.className = "timestamp"
+        timeSpan.textContent = time
+        bubble.appendChild(timeSpan)
 
-        div.onclick = () => {
-            replyTo = { name, text, id: key }
-            updateReplyUI()
-        }
-
-        chat.appendChild(div)
+        chat.appendChild(bubble)
     })
 
+    // keep scroll at bottom
     chat.scrollTop = chat.scrollHeight
 }, err => console.error("messages onValue error", err))
+
 
 // typing indicator
 onValue(ref(db, "typing"), snap => {
@@ -221,11 +221,8 @@ function escapeHtml(str) {
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;")
 }
+// typing
 let typingTimeout
-
-clearBtn.onclick = () => remove(ref(db, "messages"))
-logoutBtn.onclick = () => signOut(auth)
-
 msgInput.addEventListener('input', () => {
     if (!uid) return
     const typingRef = ref(db, "typing/" + uid)
@@ -233,3 +230,14 @@ msgInput.addEventListener('input', () => {
     clearTimeout(typingTimeout)
     typingTimeout = setTimeout(() => remove(typingRef), 1000)
 })
+
+// clear & logout
+if (clearBtn) clearBtn.onclick = () => remove(ref(db, "messages")).catch(console.error)
+if (logoutBtn) logoutBtn.onclick = () => signOut(auth).catch(console.error)
+
+// cancel reply
+if (cancelReplyBtn) cancelReplyBtn.onclick = () => {
+    replyTo = null
+    updateReplyUI()
+}
+

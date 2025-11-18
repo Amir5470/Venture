@@ -30,20 +30,34 @@ if (!msgInput || !chat || !sendBtn || !clearBtn || !logoutBtn || !userDisplay) {
 }
 
 function createBubble(data) {
+    // ensure we have an id to compare against replyTo
+    const dataId = data.id || data.key || null
+
     const bubble = document.createElement("div")
+    // escape values before inserting into DOM nodes
+    const safeName = escapeHtml(data.name || "anon")
+    const safeText = escapeHtml(data.text || "")
+
     bubble.className = `bubble ${data.uid === uid ? "sent" : "received"}`
     if (data.replyTo) {
         const replyDiv = document.createElement("div")
         replyDiv.className = "reply-preview"
-        replyDiv.textContent = `↳ ${data.replyTo.name}: ${data.replyTo.text}`
+        const safeReplyName = escapeHtml(data.replyTo.name || "anon")
+        const safeReplyText = escapeHtml(data.replyTo.text || "")
+        replyDiv.textContent = `↳ ${safeReplyName}: ${safeReplyText}`
         bubble.appendChild(replyDiv)
     }
     const textNode = document.createElement("div")
-    textNode.textContent = `${data.name}: ${data.text}`
+    textNode.textContent = `${safeName}: ${safeText}`
     bubble.appendChild(textNode)
+
+    // store id on dataset to make comparisons reliable
+    if (dataId) bubble.dataset.id = dataId
+
     bubble.addEventListener('click', () => {
-        if (replyTo && replyTo.id === data.id) replyTo = null
-        else replyTo = { name: data.name, text: data.text, id: data.id }
+        // compare against replyTo.id safely
+        if (replyTo && replyTo.id === (dataId || null)) replyTo = null
+        else replyTo = { name: data.name, text: data.text, id: dataId }
         updateReplyUI()
     })
     return bubble
@@ -156,8 +170,13 @@ onValue(ref(db, "messages"), snap => {
         const m = child.val() || {}
         const key = child.key
 
+        // attach id/key to the message object so other code can rely on it
+        try { m.id = m.id || key } catch (e) { /* noop */ }
+
         const div = document.createElement("div")
         div.className = "msg"
+        // store key on element dataset for better click handling if needed
+        if (key) div.dataset.id = key
 
         const time = m.time ? new Date(m.time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : ""
 
@@ -165,7 +184,7 @@ onValue(ref(db, "messages"), snap => {
         const name = m.name || m.user || "anon"
         const text = m.text || ""
 
-        const replyHtml = m.replyTo ? `<div class="reply-preview">↳ ${m.replyTo.name}: ${m.replyTo.text}</div>` : ""
+        const replyHtml = m.replyTo ? `<div class="reply-preview">↳ ${escapeHtml(m.replyTo.name || "anon")}: ${escapeHtml(m.replyTo.text || "")}</div>` : ""
 
         div.innerHTML = `
             <p>${escapeHtml(name)}: ${escapeHtml(text)}</p>
@@ -202,3 +221,15 @@ function escapeHtml(str) {
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;")
 }
+let typingTimeout
+
+clearBtn.onclick = () => remove(ref(db, "messages"))
+logoutBtn.onclick = () => signOut(auth)
+
+msgInput.addEventListener('input', () => {
+    if (!uid) return
+    const typingRef = ref(db, "typing/" + uid)
+    push(typingRef, true)
+    clearTimeout(typingTimeout)
+    typingTimeout = setTimeout(() => remove(typingRef), 1000)
+})

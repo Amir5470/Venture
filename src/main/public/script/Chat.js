@@ -212,6 +212,15 @@ onValue(ref(db, "typing"), snap => {
 }, err => console.error("typing onValue error", err))
 
 // small helper to avoid XSS in inserted HTML
+function escapeHtml(str) {
+    if (typeof str !== "string") return ""
+    return str
+        .replaceAll("&amp;", "&")
+        .replaceAll("&lt;", "<")
+        .replaceAll("&gt;", ">")
+        .replaceAll("&quot;", '"')
+        .replaceAll("&#039;", "'")
+}
 // typing
 let typingTimeout
 msgInput.addEventListener('input', () => {

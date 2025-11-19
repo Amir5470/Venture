@@ -9,6 +9,7 @@
     <link rel="icon" href="resources/favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="resources/favicon.ico" type="image/x-icon">
 </head>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-JXMEC88ELT"></script>
 <script>
@@ -38,6 +39,7 @@
             <input type="email" id="email" placeholder="ie: cheesechomper@example.com" />
             <label for="password" style="text-align: left;">Password</label>
             <input type="password" id="password" placeholder="ie: password123" />
+            <div class="cf-turnstile" data-sitekey="YOUR_SITE_KEY_HERE"></div>
             <button type="submit" class="login-btn" id="submitform">Submit</button>
         </div>
 
@@ -49,6 +51,7 @@
             <input type="email" id="Emailinput" placeholder="ie: cheesechomper@example.com">
             <label for="Passinput">Password</label>
             <input type="password" id="Passinput" placeholder="ie: password123">
+            <div class="cf-turnstile" data-sitekey="YOUR_SITE_KEY_HERE"></div>
             <button id="registerBtn">Register</button>
         </div>
 

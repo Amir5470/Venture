@@ -154,7 +154,7 @@ body {
 }
 
 .received {
-    background: var(--tan);
+    background: var(--light-text);
     color: #000;
     align-self: flex-start;
     border-bottom-left-radius: 4px;

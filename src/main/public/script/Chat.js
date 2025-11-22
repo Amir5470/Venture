@@ -22,8 +22,10 @@ const userDisplay = el("username")
 
 const replyBar = el("replyBar")
 const replyText = el("replyText")
-const cancelReplyBtn = el("cancelReplyBtn")
+const cancelReplyBtn = el("cancelReply")
 const typingIndicator = el("typingIndicator")
+let blockReply = false
+
 
 if (!msgInput || !chat || !sendBtn || !clearBtn || !logoutBtn || !userDisplay) {
     console.error("Missing one or more required DOM elements. Check IDs: msg, chat, send, clearbtn, logout, username")
@@ -54,14 +56,51 @@ function createBubble(data) {
     // store id on dataset to make comparisons reliable
     if (dataId) bubble.dataset.id = dataId
 
-    bubble.addEventListener('click', () => {
-        // compare against replyTo.id safely
-        if (replyTo && replyTo.id === (dataId || null)) replyTo = null
-        else replyTo = { name: data.name, text: data.text, id: dataId }
+    bubble.addEventListener('click', e => {
+    if (blockReply) return 
+
+    e.stopPropagation()
+    e.preventDefault()
+
+    const id = bubble.dataset.id
+    if (!id) return
+
+    if (replyTo && replyTo.id === id) replyTo = null
+    else replyTo = { name: data.name, text: data.text, id }
+
+    updateReplyUI()
+})
+
+let holdTimer
+let isHolding = false
+
+bubble.addEventListener('mousedown', e => {
+    isHolding = false
+    holdTimer = setTimeout(() => {
+        isHolding = true
+        showMenu(e, bubble, data)
+    }, 450)
+})
+
+bubble.addEventListener('mouseup', e => {
+    clearTimeout(holdTimer)
+    if (!isHolding) {
+        // normal click, trigger reply
+        const id = bubble.dataset.id
+        if (!id) return
+        if (replyTo && replyTo.id === id) replyTo = null
+        else replyTo = { name: data.name, text: data.text, id }
         updateReplyUI()
-    })
+    }
+})
+
+bubble.addEventListener('mouseleave', () => clearTimeout(holdTimer))
+
     return bubble
 }
+
+function registerPushTokenIfGranted() { }
+
 
 // state
 let username = "anon"
@@ -71,7 +110,7 @@ let replyTo = null
 // helpers
 const safeSetDisplay = (el, value) => { if (!el) return; el.style.display = value }
 function updateReplyUI() {
-    const replyBox = document.getElementById("replyBox")
+    const replyBox = document.getElementById("replyBar")
     const replyText = document.getElementById("replyText")
 
     if (!replyTo) {
@@ -84,30 +123,12 @@ function updateReplyUI() {
     replyText.textContent = `${replyTo.name}: ${replyTo.text}`
 }
 
-
-async function registerPushTokenIfGranted(userId) {
-    if (!messaging || !fs) return
-    try {
-        const perm = await Notification.requestPermission()
-        if (perm !== "granted") return
-        const token = await getToken(messaging, {
-            vapidKey: "BAeBCiGsPIPQa3FE6-MndYWTmWbdgWVGmGMxChSTfG84FdzJlZKjRhfHdGlehetHvm5Cr7c5VYVBx9ypFulMVCU"
-        })
-        if (token) {
-            const userRef = doc(fs, "users", userId)
-            await updateDoc(userRef, { tokens: arrayUnion(token) })
-        }
-    } catch (err) {
-        console.warn("push token registration failed", err)
-    }
-}
-
 function sendMessage() {
     if (!msgInput) return
     const text = msgInput.value?.trim()
     if (!text) return
     if (!uid) {
-        console.warn("not authenticated yet")
+        console.warn("Not authenticated yet")
         return
     }
 
@@ -119,7 +140,11 @@ function sendMessage() {
     }
 
     if (replyTo) {
-        payload.replyTo = { name: replyTo.name, text: replyTo.text }
+        payload.replyTo = {
+            name: replyTo.name,
+            text: replyTo.text,
+            id: replyTo.id
+        }
         replyTo = null
         updateReplyUI()
     }
@@ -185,7 +210,7 @@ onValue(ref(db, "messages"), snap => {
             text,
             uid: m.uid,
             id: m.id,
-            replyTo: m.replyTo || null
+            replyTo: m.replyTo ? m.replyTo : null
         })
 
         // timestamp node
@@ -241,3 +266,20 @@ if (cancelReplyBtn) cancelReplyBtn.onclick = () => {
     updateReplyUI()
 }
 
+function showMenu(e, bubble, data){
+    const menu = document.getElementById('msgMenu')
+    if(!menu) return
+
+    menu.style.display = 'flex'
+    menu.style.left = e.pageX + 'px'
+    menu.style.top = e.pageY + 'px'
+
+    menu.dataset.name = data.name
+    menu.dataset.text = data.text
+    menu.dataset.id = bubble.dataset.id
+}
+
+document.addEventListener('click', e => {
+    if(e.target.closest('#msgMenu')) return
+    document.getElementById('msgMenu').style.display = 'none'
+})

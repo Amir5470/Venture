@@ -38,8 +38,7 @@
         <div id="typingIndicator" class="typing-dots" style="display:none">
             <span></span><span></span><span></span>
         </div>
-        <div id="replyBar"
-            style="display:none; align-items:center; background:rgba(0,0,0,0.05); padding:5px 10px; border-radius:10px; margin-bottom:5px;">
+        <div id="replyBar" style="display:none; align-items:center; background:rgba(0,0,0,0.05); padding:5px 10px; border-radius:10px; margin-bottom:5px;">
             <span id="replyText" style="flex:1; font-size:14px; color:#333;"></span>
             <button id="cancelReply" style="border:none; background:none; font-weight:bold; cursor:pointer;">x</button>
         </div>
@@ -51,6 +50,22 @@
         </div>
     </div>
     <script type="module" src="./script/Chat.js"></script>
+    <div id="msgMenu" style="
+    display:none;
+    position:absolute;
+    background:#fff;
+    padding:8px;
+    border-radius:10px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.14);
+    flex-direction:column;
+    gap:6px;
+    z-index:9999;
+">
+    <button id="menuCopy" style="border-radius: 10; background-color: #4285f4; color: white;">Copy</button>
+    <button id="menuReply" style="border-radius: 10; background-color: #4285f4; color: white;">Reply</button>
+    <button id="menuReport" style="border-radius: 10; background-color: #4285f4; color: white;">Report</button>
+</div>
+
 </body>
 
 </html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Venture | Homepage</title>
+    <link rel="stylesheet" href="styles/Style.css">
+    <link rel="icon" href="resources/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="resources/favicon.ico" type="image/x-icon">
+</head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JXMEC88ELT"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JXMEC88ELT"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-JXMEC88ELT');
+</script>
+ 
+<body>
+    <div id="wrapper">
+ 
+        <!-- LEFT: Group Chats Panel -->
+        <div id="left">
+            <h1 id="friendstitle">Group Chats</h1>
+            <div id="groupchat-panel">
+                <button id="create-gc-btn">+ New Group Chat</button>
+                <div id="line"></div>
+                <div id="gc-list">
+                    <!-- populated by Script.js -->
+                </div>
+            </div>
+        </div>
+ 
+        <!-- RIGHT: User Search -->
+        <div id="right">
+            <div id="Outer-friends-search">
+                <input id="user-search" type="text" placeholder="Search for a user...">
+                <button id="search-users" class="button search-users">
+                    <img id="search-button" src="resources/magnifying-glass (1).png" class="search-button" alt="search">
+                </button>
+                <button id="settings-btn" class="button search-users" onclick="window.location.href='./settings.html'">
+                    <img id="img-settings" class="search-button" src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png" alt="settings">
+                </button>
+            </div>
+            <div id="results-container"></div>
+        </div>
+ 
+    </div>
+ 
+    <!-- Create Group Chat Modal -->
+    <div id="gc-modal-backdrop" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1000; justify-content:center; align-items:center;">
+        <div id="gc-modal" style="background:#fff; border-radius:16px; padding:28px 24px; width:360px; max-width:90vw; display:flex; flex-direction:column; gap:14px; box-shadow:0 8px 32px rgba(0,0,0,0.18);">
+            <h2>Create Group Chat</h2>
+ 
+            <input id="gc-name-input" type="text" placeholder="Group chat name...">
+ 
+            <input id="gc-user-search" type="text" placeholder="Search users to add...">
+            <div id="modal-user-results"></div>
+ 
+            <div id="selected-members"></div>
+ 
+            <div id="modal-actions">
+                <button id="modal-cancel">Cancel</button>
+                <button id="modal-create">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="script/Script.js"></script>
+</body>
+
+</html>

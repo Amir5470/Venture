@@ -8,64 +8,70 @@
     <link rel="stylesheet" href="./styles/Chat.css">
     <link rel="icon" href="resources/favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="resources/favicon.ico" type="image/x-icon">
-
 </head>
+
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-JXMEC88ELT"></script>
 <script>
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
-
     gtag('config', 'G-JXMEC88ELT');
 </script>
+
 <body>
     <div class="chat-container">
         <header>
             <a href="home.html">
                 <img style="position: absolute; left: 70px; top: 50px; width: 50px; height: 50px; transform: rotate(-30deg);"
-                    src="resources/V-BGremoved.png" alt="Venture Logo" class="logo"></a>
-            <h2 id="username" style="text-align:center;color:#4285f4;" i="username"></h2>
+                    src="resources/V-BGremoved.png" alt="Venture Logo" class="logo">
+            </a>
+            <div style="text-align:center;">
+                <h2 id="chat-title" style="color:#4285f4; margin:0;"></h2>
+                <h3 id="username" style="color:#888; margin:0; font-weight:400; font-size:14px;"></h3>
+            </div>
             <div id="pageicons">
-                <a href="home.html"><img src="https://cdn-icons-png.flaticon.com/512/25/25694.png" alt="Home icon"
-                        id="Homeico"></a>
-                <a href="Settings.html"><img src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png"
-                        alt="Settings icon" id="Settingsico"></a>
+                <a href="home.html"><img src="https://cdn-icons-png.flaticon.com/512/25/25694.png" alt="Home icon" id="Homeico"></a>
+                <a href="settings.html"><img src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png" alt="Settings icon" id="Settingsico"></a>
             </div>
         </header>
-        <div id="chat">
-        </div>
+
+        <div id="chat"></div>
+
         <div id="typingIndicator" class="typing-dots" style="display:none">
             <span></span><span></span><span></span>
         </div>
+
         <div id="replyBar" style="display:none; align-items:center; background:rgba(0,0,0,0.05); padding:5px 10px; border-radius:10px; margin-bottom:5px;">
             <span id="replyText" style="flex:1; font-size:14px; color:#333;"></span>
-            <button id="cancelReply" style="border:none; background:none; font-weight:bold; cursor:pointer;">x</button>
+            <button id="cancelReply" style="border:none; background:none; font-weight:bold; cursor:pointer;">✕</button>
         </div>
+
         <input id="msg" type="text" placeholder="Type a message...">
+
         <div id="buttons">
             <button id="send">Send</button>
             <button id="clearbtn">Clear</button>
             <button id="logout">Logout</button>
         </div>
     </div>
-    <script type="module" src="./script/Chat.js"></script>
-    <div id="msgMenu" style="
-    display:none;
-    position:absolute;
-    background:#fff;
-    padding:8px;
-    border-radius:10px;
-    box-shadow:0 4px 12px rgba(0,0,0,0.14);
-    flex-direction:column;
-    gap:6px;
-    z-index:9999;
-">
-    <button id="menuCopy" style="border-radius: 10; background-color: #4285f4; color: white;">Copy</button>
-    <button id="menuReply" style="border-radius: 10; background-color: #4285f4; color: white;">Reply</button>
-    <button id="menuReport" style="border-radius: 10; background-color: #4285f4; color: white;">Report</button>
-</div>
 
+    <div id="msgMenu" style="
+        display:none;
+        position:absolute;
+        background:#fff;
+        padding:8px;
+        border-radius:10px;
+        box-shadow:0 4px 12px rgba(0,0,0,0.14);
+        flex-direction:column;
+        gap:6px;
+        z-index:9999;">
+        <button id="menuCopy"   style="border-radius:10px; background:#4285f4; color:white; border:none; padding:6px 12px; cursor:pointer;">Copy</button>
+        <button id="menuReply"  style="border-radius:10px; background:#4285f4; color:white; border:none; padding:6px 12px; cursor:pointer;">Reply</button>
+        <button id="menuReport" style="border-radius:10px; background:#4285f4; color:white; border:none; padding:6px 12px; cursor:pointer;">Report</button>
+    </div>
+
+    <script type="module" src="./script/Chat.js"></script>
 </body>
 
 </html>

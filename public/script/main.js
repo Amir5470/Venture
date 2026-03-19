@@ -12,7 +12,7 @@ function createWindow() {
         },
     })
 
-    const htmlPath = path.join(__dirname, '../Chat.html')
+    const htmlPath = path.join(__dirname, '../chat.html')
     win.loadFile(htmlPath)
 
     // watch entire main folder (html, css, js)

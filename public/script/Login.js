@@ -32,6 +32,11 @@ const registerBtn = document.getElementById('registerBtn')
 
 signupPage.style.display = 'none'
 
+// If already logged in, skip the login page entirely
+onAuthStateChanged(auth, user => {
+    if (user) window.location.href = "./home.html"
+})
+
 modeSwitch.addEventListener('change', () => {
     if (modeSwitch.checked) {
         loginPage.style.display  = 'none'

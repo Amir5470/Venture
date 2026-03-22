@@ -4,13 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Venture | Homepage</title>
+    <title>Venture | Home</title>
     <link rel="stylesheet" href="styles/Style.css">
     <link rel="icon" href="resources/favicon.ico" type="image/x-icon">
-    <link rel="shortcut icon" href="resources/favicon.ico" type="image/x-icon">
 </head>
+
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-JXMEC88ELT"></script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-JXMEC88ELT"></script>
 <script>
     window.dataLayer = window.dataLayer || [];
@@ -18,57 +17,173 @@
     gtag('js', new Date());
     gtag('config', 'G-JXMEC88ELT');
 </script>
- 
+
 <body>
+
+    <!-- Mobile hamburger -->
+    <button id="mobile-menu-btn" aria-label="Open menu">☰</button>
+    <div id="sidebar-overlay"></div>
+
     <div id="wrapper">
- 
-        <!-- LEFT: Group Chats Panel -->
+
+        <!-- ── LEFT SIDEBAR ─────────────────────────────────── -->
         <div id="left">
-            <h1 id="friendstitle">Group Chats</h1>
-            <div id="groupchat-panel">
-                <button id="create-gc-btn">+ New Group Chat</button>
-                <div id="line"></div>
-                <div id="gc-list">
+            
+            <!-- Logo + action buttons -->
+            <div class="sidebar-header">
+                <div class="sidebar-logo">Venture<span>.</span></div>
+                <div class="header-actions">
+                    <!-- Friend requests -->
+                    <button class="icon-btn" id="open-requests-btn" title="Friend Requests">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                        </svg>
+                        <span id="requests-badge" class="notif-badge" style="display:none"></span>
+                    </button>
+                    <!-- Add friend -->
+                    <button class="icon-btn" id="open-add-friend-btn" title="Find Friends">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <line x1="19" y1="8" x2="19" y2="14" />
+                            <line x1="22" y1="11" x2="16" y2="11" />
+                        </svg>
+                    </button>
+                    <!-- Settings -->
+                    <button class="icon-btn" id="settings-sidebar-btn" title="Settings"
+                        onclick="window.location.href='./settings.html'">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="3" />
+                            <path
+                                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabs: DMs | Groups -->
+            <div class="tab-bar">
+                <button class="tab-btn active" data-tab="dms">
+                    Direct Messages
+                </button>
+                <button class="tab-btn" data-tab="groups">
+                    Groups
+                </button>
+            </div>
+
+            <!-- DMs Panel -->
+            <div class="panel active" id="panel-dms">
+                <div class="panel-inner" id="dm-list">
                     <!-- populated by Script.js -->
+                    <div class="empty-state">
+                        <div class="empty-icon">💬</div>
+                        <p>No direct messages yet. Add a friend to get started.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Groups Panel -->
+            <div class="panel" id="panel-groups">
+                <div class="panel-top">
+                    <button id="create-gc-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                        </svg>
+                        New Group Chat
+                    </button>
+                </div>
+                <div class="panel-inner" id="gc-list">
+                    <!-- populated by Script.js -->
+                    <div class="empty-state">
+                        <div class="empty-icon">👥</div>
+                        <p>No group chats yet. Create one above.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!-- ── END LEFT SIDEBAR ──────────────────────────────── -->
+
+        <!-- ── RIGHT PANEL ──────────────────────────────────── -->
+        <div id="right">
+            <div class="right-header">
+                <h2>Find People</h2>
+                <p>Search for users to message or add as friends</p>
+            </div>
+
+            <div id="Outer-friends-search">
+                <input id="user-search" type="text" placeholder="Search by username…">
+                <button id="search-users" class="search-icon-btn" aria-label="Search">
+                    <img src="resources/magnifying-glass (1).png" class="search-button" alt="search">
+                </button>
+            </div>
+
+            <div id="results-container">
+                <div class="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <p>Search for a username to find people on Venture</p>
                 </div>
             </div>
         </div>
- 
-        <!-- RIGHT: User Search -->
-        <div id="right">
-            <div id="Outer-friends-search">
-                <input id="user-search" type="text" placeholder="Search for a user...">
-                <button id="search-users" class="button search-users">
-                    <img id="search-button" src="resources/magnifying-glass (1).png" class="search-button" alt="search">
-                </button>
-                <button id="settings-btn" class="button search-users" onclick="window.location.href='./settings.html'">
-                    <img id="img-settings" class="search-button" src="https://cdn-icons-png.flaticon.com/512/3524/3524659.png" alt="settings">
-                </button>
-            </div>
-            <div id="results-container"></div>
-        </div>
- 
+        <!-- ── END RIGHT PANEL ───────────────────────────────── -->
+
     </div>
- 
-    <!-- Create Group Chat Modal -->
-    <div id="gc-modal-backdrop" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1000; justify-content:center; align-items:center;">
-        <div id="gc-modal" style="background:#fff; border-radius:16px; padding:28px 24px; width:360px; max-width:90vw; display:flex; flex-direction:column; gap:14px; box-shadow:0 8px 32px rgba(0,0,0,0.18);">
-            <h2>Create Group Chat</h2>
- 
-            <input id="gc-name-input" type="text" placeholder="Group chat name...">
- 
-            <input id="gc-user-search" type="text" placeholder="Search users to add...">
+
+    <!-- ── Create Group Chat Modal ──────────────────────────── -->
+    <div id="gc-modal-backdrop" class="modal-backdrop">
+        <div id="gc-modal" class="modal">
+            <h2>New Group Chat</h2>
+
+            <input id="gc-name-input" class="modal-input" type="text" placeholder="Group name…">
+            <input id="gc-user-search" class="modal-input" type="text" placeholder="Search users to add…">
+
             <div id="modal-user-results"></div>
- 
             <div id="selected-members"></div>
- 
+
             <div id="modal-actions">
                 <button id="modal-cancel">Cancel</button>
-                <button id="modal-create">Create</button>
+                <button id="modal-create">Create Chat</button>
             </div>
         </div>
     </div>
 
+    <!-- ── Friend Requests Modal ────────────────────────────── -->
+    <div id="requests-backdrop" class="modal-backdrop">
+        <div id="requests-modal" class="modal">
+            <h2>Friend Requests</h2>
+            <div id="requests-list">
+                <div class="empty-state">
+                    <div class="empty-icon">🔔</div>
+                    <p>No pending requests.</p>
+                </div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;padding-top:4px;">
+                <button id="requests-close"
+                    style="border:none;border-radius:12px;padding:10px 20px;cursor:pointer;font-weight:600;font-size:14px;background:var(--surface-2);color:var(--text-secondary);">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Add Friend Modal ──────────────────────────────────── -->
+    <div id="add-friend-backdrop" class="modal-backdrop">
+        <div id="add-friend-modal" class="modal">
+            <h2>Add a Friend</h2>
+            <input id="af-user-search" class="modal-input" type="text" placeholder="Search by username…">
+            <div id="af-results" class="modal-user-results-af"></div>
+            <div id="modal-actions" style="justify-content:flex-end; display:flex; gap:8px; padding-top:4px;">
+                <button id="af-cancel"
+                    style="border:none; border-radius:12px; padding:10px 20px; cursor:pointer; font-weight:600; font-size:14px; background:var(--surface-2); color:var(--text-secondary);">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script/global-settings.js"></script>
     <script type="module" src="script/Script.js"></script>
 </body>
 

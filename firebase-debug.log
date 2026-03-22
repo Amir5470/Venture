@@ -1,0 +1,46 @@
+[debug] [2026-03-22T03:41:29.937Z] ----------------------------------------------------------------------
+[debug] [2026-03-22T03:41:29.941Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\amirm\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js serve --only hosting
+[debug] [2026-03-22T03:41:29.941Z] CLI Version:   15.11.0
+[debug] [2026-03-22T03:41:29.941Z] Platform:      win32
+[debug] [2026-03-22T03:41:29.941Z] Node Version:  v22.15.0
+[debug] [2026-03-22T03:41:29.942Z] Time:          Sat Mar 21 2026 23:41:29 GMT-0400 (Eastern Daylight Time)
+[debug] [2026-03-22T03:41:29.942Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-03-22T03:41:31.747Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-03-22T03:41:31.747Z] > authorizing via signed-in user (amirmechkour5474@gmail.com)
+[debug] [2026-03-22T03:41:31.747Z] [iam] checking project venture-chat for permissions ["firebase.projects.get"]
+[debug] [2026-03-22T03:41:31.748Z] Checked if tokens are valid: true, expires at: 1774154202246
+[debug] [2026-03-22T03:41:31.748Z] Checked if tokens are valid: true, expires at: 1774154202246
+[debug] [2026-03-22T03:41:31.749Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/venture-chat:testIamPermissions [none]
+[debug] [2026-03-22T03:41:31.749Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/venture-chat:testIamPermissions  x-goog-user-project=venture-chat
+[debug] [2026-03-22T03:41:31.749Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/venture-chat:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2026-03-22T03:41:32.562Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/venture-chat:testIamPermissions 200
+[debug] [2026-03-22T03:41:32.563Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/venture-chat:testIamPermissions {"permissions":["firebase.projects.get"]}
+[debug] [2026-03-22T03:41:32.564Z] Checked if tokens are valid: true, expires at: 1774154202246
+[debug] [2026-03-22T03:41:32.564Z] Checked if tokens are valid: true, expires at: 1774154202246
+[debug] [2026-03-22T03:41:32.564Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/venture-chat/services/cloudresourcemanager.googleapis.com [none]
+[debug] [2026-03-22T03:41:32.564Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/venture-chat/services/cloudresourcemanager.googleapis.com  x-goog-user-project=venture-chat
+[debug] [2026-03-22T03:41:33.168Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/venture-chat/services/cloudresourcemanager.googleapis.com 200
+[debug] [2026-03-22T03:41:33.169Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/venture-chat/services/cloudresourcemanager.googleapis.com [omitted]
+[debug] [2026-03-22T03:41:33.175Z] Checked if tokens are valid: true, expires at: 1774154202246
+[debug] [2026-03-22T03:41:33.175Z] Checked if tokens are valid: true, expires at: 1774154202246
+[debug] [2026-03-22T03:41:33.175Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/projects/venture-chat [none]
+[debug] [2026-03-22T03:41:33.379Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/projects/venture-chat 200
+[debug] [2026-03-22T03:41:33.380Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/projects/venture-chat {"projectNumber":"528529467639","projectId":"venture-chat","lifecycleState":"ACTIVE","name":"Venture","labels":{"firebase":"enabled","firebase-core":"disabled"},"createTime":"2025-11-06T14:57:28.003109Z"}
+[debug] [2026-03-22T03:41:33.381Z] Checked if tokens are valid: true, expires at: 1774154202246
+[debug] [2026-03-22T03:41:33.381Z] Checked if tokens are valid: true, expires at: 1774154202246
+[debug] [2026-03-22T03:41:33.381Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/venture-chat/sites 
+[debug] [2026-03-22T03:41:34.239Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/venture-chat/sites 200
+[debug] [2026-03-22T03:41:34.239Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/venture-chat/sites {"sites":[{"name":"projects/venture-chat/sites/venture-chat","defaultUrl":"https://venture-chat.web.app","appId":"1:528529467639:web:8b8cb7a6b4d404ed074bf2","type":"DEFAULT_SITE"}]}
+[debug] [2026-03-22T03:41:34.240Z] Checked if tokens are valid: true, expires at: 1774154202246
+[debug] [2026-03-22T03:41:34.240Z] Checked if tokens are valid: true, expires at: 1774154202246
+[debug] [2026-03-22T03:41:34.240Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/venture-chat/webApps/1:528529467639:web:8b8cb7a6b4d404ed074bf2/config [none]
+[debug] [2026-03-22T03:41:35.103Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/venture-chat/webApps/1:528529467639:web:8b8cb7a6b4d404ed074bf2/config 200
+[debug] [2026-03-22T03:41:35.103Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/venture-chat/webApps/1:528529467639:web:8b8cb7a6b4d404ed074bf2/config {"projectId":"venture-chat","appId":"1:528529467639:web:8b8cb7a6b4d404ed074bf2","databaseURL":"https://venture-chat-default-rtdb.firebaseio.com","storageBucket":"venture-chat.firebasestorage.app","apiKey":"AIzaSyCcyZWnDpweRh7x-oEPtb7rcLy2Bh3Eo_E","authDomain":"venture-chat.firebaseapp.com","messagingSenderId":"528529467639","measurementId":"G-JXMEC88ELT","projectNumber":"528529467639","version":"2"}
+[debug] [2026-03-22T03:41:35.109Z] Checked if tokens are valid: true, expires at: 1774154202246
+[debug] [2026-03-22T03:41:35.109Z] Checked if tokens are valid: true, expires at: 1774154202246
+[debug] [2026-03-22T03:41:35.109Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/venture-chat [none]
+[debug] [2026-03-22T03:41:35.533Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/venture-chat 200
+[debug] [2026-03-22T03:41:35.533Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/venture-chat {"projectId":"venture-chat","projectNumber":"528529467639","displayName":"Venture","name":"projects/venture-chat","resources":{"hostingSite":"venture-chat","realtimeDatabaseInstance":"venture-chat-default-rtdb"},"state":"ACTIVE","etag":"1_c7723a5d-4084-4736-be20-240af05e0884"}
+[info] i  hosting[venture-chat]: Serving hosting files from: ./public {"metadata":{"emulator":{"name":"hosting"},"message":"Serving hosting files from: \u001b[1m./public\u001b[22m"}}
+[info] +  hosting[venture-chat]: Local server: http://localhost:5000 {"metadata":{"emulator":{"name":"hosting"},"message":"Local server: \u001b[4m\u001b[1mhttp://localhost:5000\u001b[22m\u001b[24m"}}

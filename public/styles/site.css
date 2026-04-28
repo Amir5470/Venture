@@ -681,4 +681,186 @@ input:checked + .slider:before {
   display: none !important;
 }
 
+/* Responsive + mobile sidebar improvements */
+
+/* Mobile menu button (hidden on desktop) */
+#mobile-menu-btn {
+  display: none; /* hidden by default; shown on small screens in media query */
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 220;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  display: none;
+}
+
+/* Sidebar overlay (click to close on mobile) */
+#sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  z-index: 210;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+/* Ensure the sidebar can slide in/out on small screens */
+#left {
+  transition: transform 0.25s ease, box-shadow 0.2s ease;
+}
+
+#left.sidebar-open {
+  transform: translateX(0) !important;
+}
+
+/* Empty state helper (centers content) */
+.empty-state {
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--text-secondary);
+}
+
+/* User search/result helpers */
+.user-result {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.user-result:hover { background: var(--surface-2); }
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.pf-avatar-lg { width: 80px; height: 80px; border-radius: 50%; display:flex; align-items:center; justify-content:center; background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%); color:#fff; font-size:24px; }
+
+/* Modal/backdrop styles */
+.modal-backdrop { display: none; position: fixed; inset: 0; align-items: center; justify-content: center; background: rgba(0,0,0,0.4); z-index: 300; padding: 20px; }
+.modal-backdrop.open { display: flex; }
+.modal { background: var(--surface); padding: 18px; border-radius: 12px; width: min(840px, 96%); box-shadow: var(--shadow-lg); color: var(--text-primary); }
+.modal h2 { margin-bottom: 12px; }
+.modal-input { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface-2); }
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  :root { --sidebar-width: 300px; }
+  #mobile-menu-btn { display: flex; }
+  #left {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    transform: translateX(-110%);
+    box-shadow: var(--shadow-lg);
+    background: var(--surface);
+    z-index: 220;
+  }
+  #sidebar-overlay.overlay-visible { display: block; opacity: 1; }
+  #right { padding: 18px; }
+  .hero .container { grid-template-columns: 1fr; gap: 30px; }
+  .hero { padding: 40px 0; }
+  .hero-content h1 { font-size: 32px; }
+  .right-header h2 { font-size: 22px; }
+  .panel-inner { padding: 8px; }
+  #user-search { height: 44px; }
+}
+
+/* Limit search icon and prevent oversized images */
+.search-icon-btn .search-button,
+.search-button {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  display: inline-block;
+}
+
+/* Prevent any large images from overflowing the right panel */
+#right img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Center the empty-state inside results container for better balance */
+#results-container .empty-state {
+  padding: 24px;
+  text-align: center;
+  margin: 40px auto;
+}
+
+/* Slightly larger empty icon for clarity */
+.empty-state .empty-icon { font-size: 28px; }
+
+/* Search layout polish */
+#Outer-friends-search {
+  justify-content: center;
+  margin-bottom: 48px;
+}
+
+#Outer-friends-search > input {
+  max-width: 820px;
+  width: 100%;
+  box-shadow: var(--shadow-xs);
+  border-radius: 12px;
+  padding: 0 48px 0 20px;
+  height: 48px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-primary);
+  font-size: 15px;
+}
+
+#Outer-friends-search > #search-users {
+  margin-left: -52px;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+#search-users img { width: 18px; height: 18px; }
+
+#results-container { min-height: calc(100vh - 260px); }
+
+#results-container .empty-state { margin: 0 auto; }
+
+.empty-state p { color: var(--text-secondary); font-size: 15px; }
+
+/* Input focus */
+#Outer-friends-search > input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 6px 18px rgba(59,110,245,0.08);
+}
+
 /* End of site.css */

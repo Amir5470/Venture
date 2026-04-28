@@ -74,7 +74,7 @@ GoogleBtn.onclick = async () => {
     try {
         const res = await signInWithPopup(auth, googleProvider)
         await saveUserData(res.user)
-        window.location.href = "./home.html"
+        window.location.href = "../home"
     } catch (e) { handleError(e) }
 }
 
@@ -82,7 +82,7 @@ GithubBtn.onclick = async () => {
     try {
         const res = await signInWithPopup(auth, githubProvider)
         await saveUserData(res.user)
-        window.location.href = "./home.html"
+        window.location.href = "../home"
     } catch (e) { handleError(e) }
 }
 
@@ -92,7 +92,7 @@ submitform.onclick = async () => {
     try {
         const res = await signInWithEmailAndPassword(auth, emailVal, passVal)
         await saveUserData(res.user)
-        window.location.href = "./home.html"
+        window.location.href = "../home"
     } catch (e) { handleError(e) }
 }
 
@@ -104,6 +104,7 @@ registerBtn.onclick = async () => {
         const userCred = await createUserWithEmailAndPassword(auth, emailVal, passVal)
         await updateProfile(userCred.user, { displayName: username })
         await saveUserData(userCred.user)
-        window.location.href = "./home.html"
+        window.location.href = "../home"
     } catch (e) { handleError(e) }
 }
+

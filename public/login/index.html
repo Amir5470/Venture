@@ -31,8 +31,8 @@
 
     gtag("config", "G-JXMEC88ELT");
   </script>
-  <body>
-    
+  <body style="overflow: hidden">
+
 
     
     <div class="login-box">
@@ -51,10 +51,10 @@
   </label>
 
 </div>
+  <!-- shared Turnstile for both login and register -->
 
 
-
-      <!-- email + pass -->
+  <!-- email + pass -->
       <div id="userpassfield">
         <label for="email" style="text-align: left">Email</label>
         <input
@@ -64,15 +64,7 @@
         />
         <label for="password" style="text-align: left">Password</label>
         <input type="password" id="password" placeholder="ie: password123" />
-        <div
-          class="cf-turnstile"
-          data-sitekey="0x4AAAAAADAHomeeHOWWlMfW"
-    data-theme="light"
-    data-size="flexible"
-    data-callback="onTurnstileSuccess"
-    data-error-callback="onTurnstileError"
-    data-expired-callback="onTurnstileExpired"
-        ></div>
+        <!-- Turnstile moved to shared widget above -->
         <button type="submit" class="login-btn" id="submitform">Submit</button>
       </div>
 
@@ -87,15 +79,7 @@
         />
         <label for="Passinput">Password</label>
         <input type="password" id="Passinput" placeholder="ie: password123" />
-        <div
-          class="cf-turnstile"
-          data-sitekey="0x4AAAAAADAHomeeHOWWlMfW"
-    data-theme="light"
-    data-size="flexible"
-    data-callback="onTurnstileSuccess"
-    data-error-callback="onTurnstileError"
-    data-expired-callback="onTurnstileExpired"
-        ></div>
+        <!-- Turnstile moved to shared widget above -->
         <button type="submit" class="login-btn" id="registerBtn">Register</button>
       </div>
 
@@ -125,6 +109,15 @@
 
       <p class="error" id="error"></p>
     </div>
+          <div id="turnstile-widget"
+    class="cf-turnstile"
+    data-sitekey="0x4AAAAAADAHomeeHOWWlMfW"
+    data-theme="light"
+    data-size="flexible"
+    data-callback="onTurnstileSuccess"
+    data-error-callback="onTurnstileError"
+    data-expired-callback="onTurnstileExpired"
+  ></div>
 
     <script>
           const TURNSTILE_VERIFY_URL = "https://venture.amirmechkour5474.workers.dev/"; // <- replace with your worker URL

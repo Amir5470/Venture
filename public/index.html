@@ -19,13 +19,14 @@
 
     gtag('config', 'G-JXMEC88ELT');
 </script>
-<body>
+<body style="overflow-x: hidden">
     <header class="header">
-        <div class="container">
-            <div class="nav">
+        <div class="container" style="  display: flex;
+  justify-content:center;">
+            <div class="nav" style=" gap: 24px;">
                 <div class="logo">
                     <img src="resources/V-BGremoved.png" alt="Venture Logo">
-                    <span>Venture</span>
+                    <span>Venture </span>
                 </div>
                 <a href="/login" class="cta-button">Get Started</a>
             </div>
@@ -33,16 +34,42 @@
     </header>
 
     <main>
+
         <section class="hero">
             <div class="container">
                 <div class="hero-content">
-                    <h1>Connect Instantly with <span class="highlight">Venture</span></h1>
+                    <h1>Chat fast with <span class="highlight">Venture</span></h1>
                     <p class="hero-description">A real-time chat application built with pure web technologies. Experience seamless messaging directly in your browser with live updates and modern authentication.</p>
                     <a href="/login" class="cta-button primary">Start Chatting Now</a>
-                </div>
-                <div class="hero-image">
-                    <img src="resources/V-BGremoved.png" alt="Venture Chat Interface">
-                </div>
+                    
+                </div>   
+                
+                <!-- Chat hero demo (CSS-only animated conversation) -->
+                        <div class="chat-window">
+                            <div class="bubble-wrapper received-wrapper">
+                                <img class="bubble-avatar" src="resources/anonymous.png" alt="Anon">
+                                <div class="bubble received" style="--i:0">Hello — welcome to Venture 👋</div>
+                            </div>
+                            <div class="bubble-wrapper sent-wrapper">
+                                <div class="bubble sent" style="--i:1">Hey! Excited to try this out.</div>
+                                <img class="bubble-avatar" src="resources/V.png" alt="You">
+                            </div>
+                            <div class="bubble-wrapper received-wrapper">
+                                <img class="bubble-avatar" src="resources/anonymous.png" alt="Anon">
+                                <div class="bubble received" style="--i:2">We support real-time chat, threads, and groups.</div>
+                            </div>
+                            <div class="bubble-wrapper received-wrapper typing-wrapper">
+                                <img class="bubble-avatar" src="resources/anonymous.png" alt="Anon">
+                                <div class="bubble received typing" style="--i:3">
+                                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                                </div>
+                            </div>
+                            <div class="bubble-wrapper sent-wrapper">
+                                <div class="bubble sent" style="--i:4">Nice — let's go build something!</div>
+                                <img class="bubble-avatar" src="resources/V.png" alt="You">
+                            </div>
+                        </div>
+                    
             </div>
         </section>
 
@@ -52,33 +79,45 @@
                 <div class="features-grid">
                     <div class="feature-card">
                         <div class="feature-icon">⚡</div>
-                        <h3>Real-Time Messaging</h3>
-                        <p>Experience instant message delivery with live updates powered by Firebase Firestore. No delays, no refresh needed.</p>
+                        <div class="feature-content">
+                            <h3>Real-Time Messaging</h3>
+                            <p>Experience instant message delivery with live updates powered by Firebase Firestore. No delays, no refresh needed.</p>
+                        </div>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon">🔐</div>
-                        <h3>Secure Authentication</h3>
-                        <p>Sign in seamlessly with Google, GitHub, or email authentication. Your security is our priority.</p>
+                        <div class="feature-content">
+                            <h3>Secure Authentication</h3>
+                            <p>Sign in seamlessly with Google, GitHub, or email authentication. Your security is our priority.</p>
+                        </div>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon">👥</div>
-                        <h3>Friend Lists</h3>
-                        <p>Build and manage your network. Connect with friends and stay in touch effortlessly.</p>
+                        <div class="feature-content">
+                            <h3>Friend Lists</h3>
+                            <p>Build and manage your network. Connect with friends and stay in touch effortlessly.</p>
+                        </div>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon">✨</div>
-                        <h3>Customizable Profiles</h3>
-                        <p>Make it yours. Personalize your profile and express yourself the way you want.</p>
+                        <div class="feature-content">
+                            <h3>Customizable Profiles</h3>
+                            <p>Make it yours. Personalize your profile and express yourself the way you want.</p>
+                        </div>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon">🌐</div>
-                        <h3>Browser-Based</h3>
-                        <p>No downloads, no installations. Access Venture directly from your browser, anywhere, anytime.</p>
+                        <div class="feature-content">
+                            <h3>Browser-Based</h3>
+                            <p>No downloads, no installations. Access Venture directly from your browser, anywhere, anytime.</p>
+                        </div>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon">🚀</div>
-                        <h3>Pure Web Tech</h3>
-                        <p>Built with HTML, CSS, and JavaScript. Fast, lightweight, and optimized for performance.</p>
+                        <div class="feature-content">
+                            <h3>Pure Web Tech</h3>
+                            <p>Built with HTML, CSS, and JavaScript. Fast, lightweight, and optimized for performance.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -88,24 +127,30 @@
             <div class="container">
                 <h2 class="section-title">Built with Modern Technologies</h2>
                 <div class="tech-list">
-                    <div class="tech-item">
-                        <span class="tech-name">HTML5</span>
-                    </div>
-                    <div class="tech-item">
-                        <span class="tech-name">CSS3</span>
-                    </div>
-                    <div class="tech-item">
-                        <span class="tech-name">JavaScript</span>
-                    </div>
-                    <div class="tech-item">
-                        <span class="tech-name">Firebase</span>
-                    </div>
-                    <div class="tech-item">
-                        <span class="tech-name">Firestore</span>
-                    </div>
-                    <div class="tech-item">
-                        <span class="tech-name">Firebase Hosting</span>
-                    </div>
+                            <div class="tech-item">
+                                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-plain.svg" alt="HTML5 logo">
+                                <span class="tech-name">HTML5</span>
+                            </div>
+                            <div class="tech-item">
+                                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-plain.svg" alt="CSS3 logo">
+                                <span class="tech-name">CSS3</span>
+                            </div>
+                            <div class="tech-item">
+                                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-plain.svg" alt="JavaScript logo">
+                                <span class="tech-name">JavaScript</span>
+                            </div>
+                            <div class="tech-item">
+                                <img src="https://www.gstatic.com/mobilesdk/160503_mobilesdk/logo/firebase_28dp.png" alt="Firebase logo">
+                                <span class="tech-name">Firebase</span>
+                            </div>
+                            <div class="tech-item">
+                                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/googlegoogle/googlegoogle-original.svg" alt="Firestore logo">
+                                <span class="tech-name">Firestore</span>
+                            </div>
+                            <div class="tech-item">
+                                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain.svg" alt="Firebase Hosting logo">
+                                <span class="tech-name">Firebase Hosting</span>
+                            </div>
                 </div>
             </div>
         </section>
@@ -121,10 +166,9 @@
 
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2025 Venture. A real-time chat application powered by Firebase.</p>
+            <p>&copy; 2026 Venture. A real-time chat application powered by Firebase.</p>
         </div>
     </footer>
-    <script src="script/global-settings.js"></script>
 </body>
 
 </html>

@@ -30,17 +30,20 @@ function toast(msg, isError = false) {
     t.textContent = msg
     t.className   = "toast-show" + (isError ? " toast-error" : "")
     clearTimeout(t._timer)
-    t._timer = setTimeout(() => { t.className = "" }, 3200)
+    t._timer = setTimeout(() => { t.textContent = "", t.classname = "" }, 3200)
 }
 
 // ── Tab switching ─────────────────────────────────────────────────────────────
 document.querySelectorAll(".settings-tab").forEach(tab => {
     tab.addEventListener("click", () => {
+        // deactivate tabs and panels
         document.querySelectorAll(".settings-tab").forEach(t => t.classList.remove("active-tab"))
-        document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none")
+        document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active-panel"))
+
+        // activate clicked tab + target panel using classes only
         tab.classList.add("active-tab")
-        const panel = $(tab.dataset.target)
-        if (panel) panel.style.display = "flex"
+        const panel = document.getElementById(tab.dataset.target)
+        if (panel) panel.classList.add("active-panel")
     })
 })
 

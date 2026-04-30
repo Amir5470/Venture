@@ -256,7 +256,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
                     item.addEventListener("click", () => {
                         closeSidebar();
-                        window.location.href = `chat.html?dm=${dm.id}`;
+                        window.location.href = `../chat/?dm=${dm.id}`;
                     });
                     dmList.appendChild(item);
                 });
@@ -312,7 +312,7 @@ window.addEventListener("DOMContentLoaded", () => {
                     item.addEventListener("click", (e) => {
                         if (e.target.closest(".gc-delete-btn")) return;
                         closeSidebar();
-                        window.location.href = `chat.html?gc=${gc.id}`;
+                        window.location.href = `../chat/?gc=${gc.id}`;
                     });
 
                     // Delete button
@@ -434,7 +434,7 @@ window.addEventListener("DOMContentLoaded", () => {
             );
 
             gcModalBackdrop.classList.remove("open");
-            window.location.href = `chat.html?gc=${gcId}`;
+            window.location.href = `../chat/?gc=${gcId}`;
         } catch (err) {
             console.error("Failed to create group chat:", err);
             alert("Something went wrong. Check the console.");

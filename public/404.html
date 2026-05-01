@@ -2,12 +2,22 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Venture | 404</title>
+    <meta name="description" content="Page not found on Venture.">
+    <meta name="robots" content="noindex, follow">
     <link rel="stylesheet" href="styles/site.css">
     <link rel="icon" href="resources/favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="resources/favicon.ico" type="image/x-icon">
+    <meta property="og:title" content="Venture | 404">
+    <meta property="og:description" content="Page not found on Venture.">
+    <link rel="canonical" href="/404.html">
+    <meta name="theme-color" content="#3b6ef5">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Venture | Not Found">
+    <meta name="twitter:description" content="Page not found on Venture.">
+    <meta name="twitter:image" content="/resources/OG.png">
 </head>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-JXMEC88ELT"></script>
@@ -30,7 +40,7 @@
 
             </div>
             <p id="error-message" data-text="Oops! Page not found">Oops! Page not found</p>
-            <button id="back-home" onclick="window.location.href='../home'">Go Home</button>
+            <button id="back-home" onclick="go('../home')">Go Home</button>
         </div>
     </div>
 </body>

@@ -1,24 +1,35 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Venture | Settings</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Settings | Venture</title>
+    <meta name="description" content="Update your Venture profile, privacy, and appearance settings." />
+    <meta name="author" content="Venture" />
+    <meta name="robots" content="noindex, nofollow" />
+    <link rel="canonical" href="/settings/" />
+    <meta name="theme-color" content="#3b6ef5" />
     <link rel="stylesheet" href="../styles/site.css" />
+    <link rel="icon" href="../resources/favicon.ico" type="image/x-icon" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Venture | Settings" />
+    <meta property="og:description" content="Update your Venture profile, privacy, and appearance settings." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/resources/OG.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Venture | Settings" />
+    <meta name="twitter:description" content="Update your Venture profile, privacy, and appearance settings." />
+    <meta name="twitter:image" content="/resources/OG.png" />
   </head>
 
   <!-- Google tag (gtag.js) -->
-  <script
-    async
-    src="https://www.googletagmanager.com/gtag/js?id=G-JXMEC88ELT"
-  ></script>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JXMEC88ELT"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag() {
-      dataLayer.push(arguments);
-    }
-    gtag("js", new Date());
-    gtag("config", "G-JXMEC88ELT");
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-JXMEC88ELT');
   </script>
 
   <body class="settings-page">
@@ -30,6 +41,7 @@
       <aside class="settings-sidebar">
         <div class="sidebar-top">
           <a href="../home/"><img src="../resources/V-BGremoved.png" alt="Venture Logo" style="width:44px;height:44px;object-fit:contain"/></a>
+        
           <h2>Settings</h2>
         </div>
 
@@ -257,50 +269,76 @@
           </div>
         </section>
 
-        <!-- APPEARANCE PANEL -->
+        <!-- APPEARANCE PANEL (redesigned) -->
         <section id="panel-appearance" class="tab-panel">
-          <div class="appearance-section">
+          <div class="appearance-section settings-card">
             <h3>Theme</h3>
-            <div class="toggle-row">
-              <span>Dark Mode</span>
-              <label class="toggle-switch">
-                <input type="checkbox" id="dark-mode-toggle" />
-                <span class="toggle-slider"></span>
-              </label>
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">Dark Mode</div>
+                <div class="setting-desc">Toggle the app between light and dark appearances.</div>
+              </div>
+              <div class="setting-control">
+                <label class="toggle-switch">
+                  <input type="checkbox" id="dark-mode-toggle" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
             </div>
           </div>
 
-          <div class="appearance-section">
+          <div class="appearance-section settings-card">
             <h3>Accent Color</h3>
-            <div id="color-swatches">
-              <div class="swatch" data-color="#4285f4" style="background: #4285f4" title="Google Blue"></div>
-              <div class="swatch" data-color="#ea4335" style="background: #ea4335" title="Red"></div>
-              <div class="swatch" data-color="#34a853" style="background: #34a853" title="Green"></div>
-              <div class="swatch" data-color="#fbbc04" style="background: #fbbc04" title="Yellow"></div>
-              <div class="swatch" data-color="#9c27b0" style="background: #9c27b0" title="Purple"></div>
-              <div class="swatch" data-color="#00bcd4" style="background: #00bcd4" title="Cyan"></div>
-              <div class="swatch" data-color="#ff5722" style="background: #ff5722" title="Deep Orange"></div>
-              <div class="swatch" data-color="#607d8b" style="background: #607d8b" title="Blue Grey"></div>
-              <input type="color" id="custom-color-picker" title="Custom color" value="#4285f4" />
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">Primary Accent</div>
+                <div class="setting-desc">Choose the primary accent color used across the UI.</div>
+              </div>
+              <div class="setting-control" id="color-swatches-wrap">
+                <div id="color-swatches">
+                  <div class="swatch" data-color="#4285f4" style="background: #4285f4" title="Google Blue"></div>
+                  <div class="swatch" data-color="#ea4335" style="background: #ea4335" title="Red"></div>
+                  <div class="swatch" data-color="#34a853" style="background: #34a853" title="Green"></div>
+                  <div class="swatch" data-color="#fbbc04" style="background: #fbbc04" title="Yellow"></div>
+                  <div class="swatch" data-color="#9c27b0" style="background: #9c27b0" title="Purple"></div>
+                  <div class="swatch" data-color="#00bcd4" style="background: #00bcd4" title="Cyan"></div>
+                  <div class="swatch" data-color="#ff5722" style="background: #ff5722" title="Deep Orange"></div>
+                  <div class="swatch" data-color="#607d8b" style="background: #607d8b" title="Blue Grey"></div>
+                </div>
+                <input type="color" id="custom-color-picker" title="Custom color" value="#4285f4" />
+              </div>
             </div>
           </div>
 
-          <div class="appearance-section">
+          <div class="appearance-section settings-card">
             <h3>Font Size</h3>
-            <div class="slider-row">
-              <span>Small</span>
-              <input type="range" id="font-size-slider" min="12" max="20" step="1" value="15" />
-              <span>Large</span>
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">Base font size</div>
+                <div class="setting-desc">Adjust the base font size for the interface.</div>
+              </div>
+              <div class="setting-control range-control">
+                <input type="range" id="font-size-slider" min="12" max="20" step="1" value="15" />
+                <div class="range-value"><span id="font-size-value">15</span>px</div>
+              </div>
             </div>
             <p id="font-size-preview">Preview text — This is how your messages look.</p>
           </div>
 
-          <div class="appearance-section">
+          <div class="appearance-section settings-card">
             <h3>Chat Bubble Style</h3>
-            <div id="bubble-style-options">
-              <div class="bubble-option active-bubble" data-style="rounded" id="style-rounded">Rounded</div>
-              <div class="bubble-option" data-style="square" id="style-square">Square</div>
-              <div class="bubble-option" data-style="pill" id="style-pill">Pill</div>
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">Bubble shape</div>
+                <div class="setting-desc">Choose the chat bubble corner style.</div>
+              </div>
+              <div class="setting-control">
+                <div id="bubble-style-options" style="display:flex;gap:8px">
+                  <div class="bubble-option active-bubble" data-style="rounded" id="style-rounded">Rounded</div>
+                  <div class="bubble-option" data-style="square" id="style-square">Square</div>
+                  <div class="bubble-option" data-style="pill" id="style-pill">Pill</div>
+                </div>
+              </div>
             </div>
           </div>
         </section>

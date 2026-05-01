@@ -21,3 +21,25 @@ document.body.style.fontSize = savedFont + "px"
 const savedBubble = localStorage.getItem("venture-bubble-style") || "rounded"
 const bubbleMap = { rounded: "16px", square: "4px", pill: "999px" }
 document.documentElement.style.setProperty("--bubble-radius", bubbleMap[savedBubble] || "16px")
+
+// ── Navigation helper: support serving from `/public/` during local preview
+;(function(){
+    const p = window.location.pathname || ''
+    const base = p.split('/').includes('public') ? '/public' : ''
+    window.siteBase = base
+
+    // Use `go(path)` to navigate. `path` may be:
+    // - absolute (starts with `/`) -> prefixed with `siteBase`
+    // - relative (starts with `./` or `..`) -> used as-is
+    // - external (http:, //, mailto:, data:) -> used as-is
+    window.go = function(path) {
+        if (!path) return
+        if (/^(https?:|\/\/|data:|mailto:)/.test(path)) { window.location.href = path; return }
+        if (path.startsWith('/')) {
+            window.location.href = (base + path).replace(/\/+/g, '/')
+            return
+        }
+        // keep relative paths untouched so they resolve from the current document
+        window.location.href = path
+    }
+})()

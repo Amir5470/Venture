@@ -62,7 +62,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // ── Auth ──────────────────────────────────────────────────────────────────
     onAuthStateChanged(auth, user => {
-        if (!user) { window.location.href = "./index.html"; return; }
+        if (!user) { go("./index.html"); return; }
         currentUser = user;
         loadDMs();
         loadGroupChats();
@@ -199,7 +199,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
                 document.getElementById("add-friend-pf").addEventListener("click", () => sendFriendRequest(user.uid));
                 document.getElementById("message-friend-pf").addEventListener("click", () => {
-                    window.location.href = "/chat/";
+                    go('/chat/')
                 });
                 document.getElementById("pf-search-back").addEventListener("click", handleSearch);
             });
@@ -284,7 +284,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
                 item.addEventListener("click", () => {
                     closeSidebar();
-                    window.location.href = `/chat/?dm=${dm.id}`;
+                    go(`/chat/?dm=${dm.id}`)
                 });
                 dmList.appendChild(item);
             }
@@ -340,7 +340,7 @@ window.addEventListener("DOMContentLoaded", () => {
                     item.addEventListener("click", (e) => {
                         if (e.target.closest(".gc-delete-btn")) return;
                         closeSidebar();
-                        window.location.href = `/chat/?gc=${gc.id}`;
+                        go(`/chat/?gc=${gc.id}`)
                     });
 
                     // Delete button
@@ -462,7 +462,7 @@ window.addEventListener("DOMContentLoaded", () => {
             );
 
             gcModalBackdrop.classList.remove("open");
-            window.location.href = `/chat/?gc=${gcId}`;
+            go(`/chat/?gc=${gcId}`)
         } catch (err) {
             console.error("Failed to create group chat:", err);
             alert("Something went wrong. Check the console.");

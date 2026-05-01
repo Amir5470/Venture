@@ -20,7 +20,7 @@ const gcId   = params.get("gc")
 const dmId   = params.get("dm")
 
 // Must have one or the other
-if (!gcId && !dmId) { window.location.href = "./home.html" }
+if (!gcId && !dmId) { go("./home.html") }
 
 // isDM flag drives all branching below
 const isDM = !!dmId
@@ -37,7 +37,7 @@ const msgInput        = el("msg")
 const chat            = el("chat")
 const sendBtn         = el("send")
 const clearBtn        = el("clearbtn")
-const logoutBtn       = el("logout")
+const logoutBtn       = el("logout") || el("logout-chat") || el("logout-button")
 const userDisplay     = el("username")
 const replyBar        = el("replyBar")
 const replyText       = el("replyText")
@@ -60,7 +60,7 @@ const pfpCache = {}
 // ── Load chat title ───────────────────────────────────────────────────────────
 // For GC: read name field. For DM: derive the other person's name from members map.
 onValue(ref(db, basePath), snap => {
-    if (!snap.exists()) { window.location.href = "./home.html"; return }
+    if (!snap.exists()) { go("./home.html"); return }
 
     if (!chatTitle) return
 
@@ -81,7 +81,7 @@ onValue(ref(db, basePath), snap => {
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 onAuthStateChanged(auth, async user => {
-    if (!user) { window.location.href = "./index.html"; return }
+    if (!user) { go("./index.html"); return }
     username = user.displayName || user.email?.split("@")[0] || "anon"
     uid      = user.uid
     if (userDisplay) userDisplay.textContent = `Welcome Back, ${username}`
@@ -385,7 +385,12 @@ async function sendFile(file) {
 msgInput?.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage() })
 sendBtn?.addEventListener("click", sendMessage)
 clearBtn?.addEventListener("click", () => remove(ref(db, messagesPath)).catch(console.error))
-logoutBtn?.addEventListener("click", () => signOut(auth).catch(console.error))
+logoutBtn?.addEventListener("click", async () => {
+    try {
+        await signOut(auth)
+        go("./index.html")
+    } catch (e) { console.error(e) }
+})
 cancelReplyBtn?.addEventListener("click", () => { replyTo = null; updateReplyUI() })
 attachBtn?.addEventListener("click", () => fileInput?.click())
 fileInput?.addEventListener("change", e => { if (e.target.files[0]) sendFile(e.target.files[0]); fileInput.value = "" })

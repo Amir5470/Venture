@@ -41,8 +41,8 @@ body.dark {
   --surface-2: #2c2c2e;
   --surface-3: #3a3a3c;
   --text-primary: #f5f5f7;
-  --text-secondary: #aeaeb2;
-  --text-muted: #636366;
+  --text-secondary: #d1d1d6;
+  --text-muted: #9fa3a8;
   --border: #3a3a3c;
   --shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.3);
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -60,13 +60,16 @@ body.dark {
   font-family: var(--font);
 }
 
-html,
-body {
+html, body {
   height: 100%;
   background: var(--bg);
   color: var(--text-primary);
-  -webkit-font-smoothing: antialiased;
+  margin: 0 !important;
+  padding: 0 !important;
 }
+
+/* Ensure the html element background matches body so gaps above body are not visible */
+html { background: var(--bg); }
 
 /* Layout and components (copied from Style.css) */
 #wrapper {
@@ -393,10 +396,33 @@ body {
   line-height: 1.6;
 }
 
+/* Remove the landing gradient when in dark mode for login and chat pages */
+body.dark.login-page,
+body.dark.chat-page {
+  background: var(--bg);
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
+}
+
+/* Header icon color (use currentColor so SVGs using stroke="currentColor" adapt)
+   Ensures icons are dark in light mode and light in dark mode. */
+header, .header-icon-btn, header button {
+  color: var(--text-secondary);
+}
+
+/* Make sure SVGs inherit the color for stroke/fill */
+header svg, .header-icon-btn svg, header button svg {
+  stroke: currentColor;
+  fill: none;
+}
+
+/* In dark mode prefer the primary (light) text color for icons */
+body.dark header, body.dark .header-icon-btn, body.dark header button {
+  color: var(--text-primary);
 }
 .header {
   background: var(--surface);
@@ -406,6 +432,22 @@ body {
   top: 0;
   z-index: 100;
 }
+
+.header-icon-btn {
+    background: var(--bg);
+  color: var(--text-muted);
+  border: 1px solid var(--accent);
+  border-radius: 7px;
+  padding: 5px;
+  cursor: pointer;
+  text-align: center;
+  font-weight: 600;
+  transition: ease-in-out 0.2s;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+}
+
 .nav {
   display: flex;
   justify-content: space-between;
@@ -765,6 +807,66 @@ body {
 }
 
 /* --- Login compatibility rules --- */
+
+/* Redesigned settings card + items (shadcn-like look) */
+.settings-card {
+  background: var(--surface);
+  border: 1px solid rgba(0,0,0,0.06);
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(16,24,40,0.04);
+  margin-bottom: 16px;
+}
+.setting-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0;
+}
+.setting-label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.setting-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+.setting-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.range-control { width: 320px; max-width: 60%; }
+.range-value { font-weight:600; color:var(--text-primary); margin-left:8px; min-width:48px; text-align:right }
+#font-size-preview { margin-top:10px; color:var(--text-secondary); font-size:0.95rem }
+
+/* small toggle switch */
+.toggle-switch { display:inline-block; position:relative }
+.toggle-switch input { display:none }
+.toggle-slider {
+  width:44px; height:24px; background: #e6e9ee; border-radius:999px; display:inline-block; position:relative; transition:all .18s ease; vertical-align:middle
+}
+.toggle-slider:after{ content:''; width:18px; height:18px; background:#fff; border-radius:50%; position:absolute; left:3px; top:3px; box-shadow:0 1px 2px rgba(0,0,0,0.06); transition:all .18s ease }
+.toggle-switch input:checked + .toggle-slider { background: var(--accent) }
+.toggle-switch input:checked + .toggle-slider:after { transform:translateX(20px) }
+
+/* swatches */
+#color-swatches { display:flex; gap:8px; flex-wrap:wrap; align-items:center }
+.swatch { width:34px; height:34px; border-radius:8px; cursor:pointer; border:2px solid transparent }
+.swatch:hover { transform:translateY(-2px) }
+#custom-color-picker { width:40px; height:34px; padding:0; border:none; background:transparent; cursor:pointer }
+
+/* bubble options */
+.bubble-option { padding:8px 12px; border-radius:8px; background:transparent; border:1px solid rgba(0,0,0,0.06); cursor:pointer }
+.bubble-option.active-bubble { background: linear-gradient(90deg, rgba(0,0,0,0.03), rgba(0,0,0,0.01)); border-color:rgba(0,0,0,0.1); }
+
+/* Range input improvements */
+input[type="range"] { -webkit-appearance:none; appearance:none }
+input[type="range"]::-webkit-slider-runnable-track { height:8px; background: linear-gradient(90deg,var(--accent) 0%,var(--accent) 100%); border-radius:6px }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:18px; height:18px; margin-top:-5px; background:#fff; border-radius:50%; box-shadow:0 1px 2px rgba(0,0,0,0.15) }
+
 /* Compatibility rules for current login page markup */
 .login-box {
   max-width: 400px;
@@ -834,6 +936,32 @@ input[type="text"] {
   background: var(--bg);
   height: 100%;
   width: 100%;
+}
+
+/* Settings page: boost contrast for dark mode */
+body.dark .settings-page {
+  background: var(--bg);
+}
+body.dark .settings-page .settings-sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+body.dark .settings-page .settings-main {
+  background: transparent;
+}
+body.dark .settings-tab {
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+body.dark .settings-tab.active-tab {
+  background: linear-gradient(90deg, rgba(59,110,245,0.12), rgba(59,110,245,0.06));
+  color: var(--accent);
+}
+body.dark .provider-icon {
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
 }
 .settings-page header {
   display: flex;
@@ -1110,7 +1238,7 @@ input[type="text"] {
 .privacy-option .option-desc { color:var(--text-secondary); font-size:13px }
 
 /* Toggle switch */
-.toggle-switch { position: relative; display:inline-block; width:46px; height:26px }
+.toggle-switch { position: relative; display:inline-block; width:46px; height:26px; align-items: center; justify-content: center;}
 .toggle-switch input { opacity: 0; width: 0; height: 0 }
 .toggle-switch .toggle-slider { position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background:var(--surface); border-radius:999px; transition: background 0.18s, border-color 0.18s }
 .toggle-switch .toggle-slider::after { content:""; position:absolute; width:18px; height:18px; left:4px; top:4px; background:#fff; border-radius:50%; transition: transform 0.18s }
@@ -1152,6 +1280,76 @@ input[type="text"] {
   justify-content: space-between;
   gap: 12px;
 }
+
+/* Range slider styling (font-size slider) */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 320px;
+  max-width: 60%;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--surface-2) 0%);
+  outline: none;
+  transition: box-shadow 0.12s ease, background 0.12s ease;
+}
+
+input[type="range"]:focus {
+  box-shadow: 0 0 0 6px rgba(59,110,245,0.08);
+}
+
+/* WebKit track */
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 8px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+
+/* WebKit thumb */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--surface);
+  margin-top: -5px; /* center the thumb */
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+
+/* Mozilla */
+input[type="range"]::-moz-range-track {
+  height: 8px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  border: 1px solid var(--border);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 3px solid var(--surface);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+
+/* In dark mode make track darker and thumb stand out */
+body.dark input[type="range"]::-webkit-slider-runnable-track,
+body.dark input[type="range"]::-moz-range-track {
+  background: #2a2a2c;
+}
+body.dark input[type="range"]::-webkit-slider-thumb,
+body.dark input[type="range"]::-moz-range-thumb {
+  background: var(--accent);
+  border: 3px solid var(--surface);
+}
+
+/* Preview text color coherent with theme */
+#font-size-preview { color: var(--text-secondary); margin-top:8px }
 
 #color-swatches {
   display: flex;
@@ -1212,6 +1410,21 @@ input[type="text"] {
   border: var(--danger-hover) solid 1px;
   transition: all 0.2s ease-in-out;
 
+}
+
+#logout-chat {
+  background: var(--bg);
+  color: var(--text-muted);
+  border: 1px solid var(--danger);
+  border-radius: 7px;
+  padding: 5px;
+  cursor: pointer;
+  text-align: center;
+  font-weight: 600;
+  transition: ease-in-out 0.2s;
+  justify-content: center;
+  display: flex;
+  align-items: center;
 }
 
 .danger-zone {
@@ -1349,6 +1562,81 @@ label {
   width: 0;
   height: 0;
 }
+
+
+
+/* Login page dark-mode polish */
+body.dark.login-page {
+  background: linear-gradient(180deg, #0b0b0c 0%, #0b0b0c 100%);
+}
+
+body.dark.login-page .login-box {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 12px 36px rgba(2,6,23,0.6);
+}
+
+body.dark.login-page #venture-login {
+  color: var(--text-primary);
+}
+
+body.dark.login-page label,
+body.dark.login-page #linebox p,
+body.dark.login-page .line {
+  color: var(--text-secondary);
+}
+
+body.dark.login-page input[type="email"],
+body.dark.login-page input[type="password"],
+body.dark.login-page input[type="text"] {
+  background: rgba(255,255,255,0.03);
+  color: var(--text-primary);
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
+body.dark.login-page .login-btn {
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+  color: #fff;
+  border: none;
+  box-shadow: 0 6px 18px rgba(59,110,245,0.18);
+}
+
+body.dark.login-page .oauth-btn {
+  background: rgba(255,255,255,0.03);
+  color: var(--text-primary);
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
+body.dark.login-page #headerbox {
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+}
+
+/* Slightly dim the turnstile widget area on dark page background */
+body.dark.login-page #turnstile-widget { filter: brightness(0.9); }
+
+/* Temporary: hide common dev-server / extension overlays that inject a top bar
+   These selectors target common tools (LiveReload, BrowserSync, Live Server, VSCode preview).
+   Remove this block when you identify the real injector. */
+#live-server,
+#LiveServer,
+#__bs_notify__,
+.\__bs_notify,
+.livereload,
+#livereload,
+.browser-sync,
+#browser-sync,
+.browser-sync-ui,
+.vscode-browser-preview-webview-toolbar,
+.vscode-browser-preview,
+.toolbar-overlay {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* If the bar persists, please inspect it in DevTools and paste the element's id/class here. */
 
 /* The sliding track */
 .slider {
@@ -1680,6 +1968,14 @@ input:checked + .slider:before {
   display: flex;
   align-items: center;
 }
+
+.header-right {
+  gap: 12px;
+  display:flex;
+  align-items:center;
+  justify-content: center;
+}
+
 .header-center {
   flex: 1;
   flex-direction: column;
@@ -1742,11 +2038,12 @@ input:checked + .slider:before {
   font-size: 14px;
   line-height: 1.4;
   box-shadow: var(--shadow-xs);
+  flex-direction: column;
 }
 .bubble .timestamp {
   display: block;
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--text-primary);
   margin-top: 8px;
 }
 
@@ -1754,11 +2051,13 @@ input:checked + .slider:before {
   background: var(--surface-2);
   color: var(--text-primary);
   border-top-left-radius: 6px;
+  text-align: left;
 }
 .bubble.sent {
   background: linear-gradient(180deg, var(--accent), var(--accent-hover));
   color: #fff;
   border-top-right-radius: 6px;
+  text-align: right;
 }
 
 .reply-preview {

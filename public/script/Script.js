@@ -215,7 +215,7 @@ window.addEventListener("DOMContentLoaded", () => {
     function loadDMs() {
         if (!currentUser) return;
 
-        onValue(ref(rtdb, "dms"), snap => {
+        onValue(ref(rtdb, "dms"), async snap => {
             // Filter DMs where this user is a member
             const myDMs = [];
             if (snap.exists()) {
@@ -234,32 +234,60 @@ window.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            myDMs
-                .sort((a, b) => (b.lastAt || 0) - (a.lastAt || 0))
-                .forEach(dm => {
-                    const members = dm.members || {};
-                    // Find the other person
-                    const otherUid = Object.keys(members).find(uid => uid !== currentUser.uid);
-                    const otherName = otherUid ? members[otherUid] : "Unknown";
-                    const initials = getInitials(otherName);
+            myDMs.sort((a, b) => (b.lastAt || 0) - (a.lastAt || 0));
 
-                    const item = document.createElement("div");
-                    item.className = "conv-item";
-                    item.innerHTML = `
-                        <div class="conv-avatar">${escapeHtml(initials)}
-                            <div class="online-dot"></div>
-                        </div>
-                        <div class="conv-info">
-                            <div class="conv-name">${escapeHtml(otherName)}</div>
-                            <div class="conv-preview">${escapeHtml(dm.lastMessage || "No messages yet")}</div>
-                        </div>`;
+            // Collect unique other-user UIDs and batch fetch their Firestore docs to reduce reads
+            const otherUids = Array.from(new Set(myDMs.map(dm => {
+                const members = dm.members || {}
+                return Object.keys(members).find(uid => uid !== currentUser.uid)
+            }).filter(Boolean)))
 
-                    item.addEventListener("click", () => {
-                        closeSidebar();
-                        window.location.href = `/chat/?dm=${dm.id}`;
-                    });
-                    dmList.appendChild(item);
+            const userDocsMap = {}
+            if (otherUids.length > 0) {
+                try {
+                    const promises = otherUids.map(uid => getDoc(doc(fs, "users", uid)).then(s => ({ uid, snap: s })).catch(err => ({ uid, snap: null })))
+                    const results = await Promise.all(promises)
+                    results.forEach(r => { if (r.snap && r.snap.exists()) userDocsMap[r.uid] = r.snap.data() })
+                } catch (err) {
+                    console.error('Batch user fetch failed', err)
+                }
+            }
+
+            // Build list and use cached userDocsMap for pfp lookups
+            for (const dm of myDMs) {
+                const members = dm.members || {};
+                // Find the other person
+                const otherUid = Object.keys(members).find(uid => uid !== currentUser.uid);
+                const otherName = otherUid ? members[otherUid] : "Unknown";
+                const initials = getInitials(otherName);
+
+                // Look up other user's pfp from cached map
+                let pfpUrl = null
+                if (otherUid && userDocsMap[otherUid]) pfpUrl = userDocsMap[otherUid].pfp || null
+
+                const item = document.createElement("div");
+                item.className = "conv-item";
+
+                let avatarHtml;
+                if (pfpUrl) {
+                    avatarHtml = `<div class="conv-avatar"><img src="${escapeHtml(pfpUrl)}" alt="${escapeHtml(otherName)}"><div class="online-dot"></div></div>`;
+                } else {
+                    avatarHtml = `<div class="conv-avatar">${escapeHtml(initials)}<div class="online-dot"></div></div>`;
+                }
+
+                item.innerHTML = `
+                    ${avatarHtml}
+                    <div class="conv-info">
+                        <div class="conv-name">${escapeHtml(otherName)}</div>
+                        <div class="conv-preview">${escapeHtml(dm.lastMessage || "No messages yet")}</div>
+                    </div>`;
+
+                item.addEventListener("click", () => {
+                    closeSidebar();
+                    window.location.href = `/chat/?dm=${dm.id}`;
                 });
+                dmList.appendChild(item);
+            }
         }, err => console.error("DMs onValue error", err));
     }
 

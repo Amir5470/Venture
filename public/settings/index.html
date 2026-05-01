@@ -26,299 +26,286 @@
     <div id="toast"></div>
 
     <div class="settings-container">
-      <header class="settings-header">
-        <a href="../home/"
-          ><img
-            src="../resources/V-BGremoved.png"
-            alt="Venture Logo"
-            style="width: 52px; height: 52px; object-fit: contain"
-        /></a>
-        <h2>Settings</h2>
-      </header>
-
-      <!-- Tab switcher -->
-      <section id="settings-tab-group">
-        <div
-          class="settings-tab active-tab"
-          id="profile-tab"
-          data-target="panel-profile"
-        >
-          <h3>Profile</h3>
-        </div>
-        <div class="settings-tab" id="account-tab" data-target="panel-account">
-          <h3>Account</h3>
-        </div>
-        <div
-          class="settings-tab"
-          id="appearance-tab"
-          data-target="panel-appearance"
-        >
-          <h3>Appearance</h3>
-        </div>
-      </section>
-
-      <!-- ── PROFILE PANEL ── -->
-      <main id="panel-profile" class="tab-panel active-panel">
-        <div id="pfp-section">
-          <div id="profile-pic-wrapper">
-            <img
-              id="profile-pic"
-              src="../resources/anonymous.png"
-              alt="Profile Picture"
-            />
-          </div>
-          <button id="change-pfp-btn">Change Photo</button>
-          <input
-            type="file"
-            id="pfp-file-input"
-            accept="image/*"
-            style="display: none"
-          />
+      
+      <aside class="settings-sidebar">
+        <div class="sidebar-top">
+          <a href="../home/"><img src="../resources/V-BGremoved.png" alt="Venture Logo" style="width:44px;height:44px;object-fit:contain"/></a>
+          <h2>Settings</h2>
         </div>
 
-        <div id="personal-info">
-          <div class="field-group">
-            <label for="display-name-input">Display Name</label>
-            <input
-              type="text"
-              id="display-name-input"
-              maxlength="30"
-              placeholder="eg: Cheesegobbler26"
-              disabled
-            />
-          </div>
-          <div class="field-group">
-            <label for="bio-input">Bio</label>
-            <textarea
-              id="bio-input"
-              maxlength="150"
-              placeholder="Tell a little about yourself..."
-              disabled
-            ></textarea>
-            <span id="bio-char-count">0 / 150</span>
-          </div>
-        </div>
-
-        <div id="edit-save-btns">
-          <div id="edit-profile-btn" class="btn btn-accent">
-            <h4>Edit Profile</h4>
-          </div>
-          <div
-            id="save-changes-btn"
-            class="btn btn-accent"
-            style="display: none"
-          >
-            <h4>Save Changes</h4>
-          </div>
-          <div id="cancel-edit-btn" class="btn btn-gray" style="display: none">
-            <h4>Cancel</h4>
-          </div>
-        </div>
-      </main>
-
-      <!-- ── ACCOUNT PANEL ── -->
-      <main id="panel-account" class="tab-panel">
-        <div class="account-section">
-          <h3>Account Info</h3>
-          <div class="field-group">
-            <label>Email</label>
-            <p id="current-email" class="info-text">—</p>
-          </div>
-          <div class="field-group">
-            <label>Username</label>
-            <p id="current-username" class="info-text">—</p>
-          </div>
-          <div class="field-group">
-            <label>Member Since</label>
-            <p id="member-since" class="info-text">—</p>
-          </div>
-        </div>
-
-        <div class="account-section">
-          <h3>Change Email</h3>
-          <div class="field-group">
-            <label for="new-email-input">New Email</label>
-            <input
-              type="email"
-              id="new-email-input"
-              placeholder="new@email.com"
-            />
-          </div>
-          <div class="field-group">
-            <label for="email-pass-input">Current Password (required)</label>
-            <input
-              type="password"
-              id="email-pass-input"
-              placeholder="Your current password"
-            />
-          </div>
-          <button class="btn btn-accent" id="change-email-btn">
-            Update Email
+        <nav class="settings-nav">
+          <button class="settings-tab active-tab" id="profile-tab" data-target="panel-profile">
+            <span class="tab-icon">👤</span>
+            <span class="tab-label">Profile</span>
           </button>
-        </div>
-
-        <div class="account-section">
-          <h3>Change Password</h3>
-          <div class="field-group">
-            <label for="current-pass-input">Current Password</label>
-            <input
-              type="password"
-              id="current-pass-input"
-              placeholder="Current password"
-            />
-          </div>
-          <div class="field-group">
-            <label for="new-pass-input">New Password</label>
-            <input
-              type="password"
-              id="new-pass-input"
-              placeholder="New password (min 6 chars)"
-            />
-          </div>
-          <div class="field-group">
-            <label for="confirm-pass-input">Confirm New Password</label>
-            <input
-              type="password"
-              id="confirm-pass-input"
-              placeholder="Confirm new password"
-            />
-          </div>
-          <button class="btn btn-accent" id="change-pass-btn">
-            Update Password
+          <button class="settings-tab" id="account-tab" data-target="panel-account">
+            <span class="tab-icon">🔒</span>
+            <span class="tab-label">Account</span>
           </button>
-        </div>
-
-        <div class="account-section danger-zone">
-          <h3>Danger Zone</h3>
-          <button class="btn btn-danger" id="delete-account-btn">
-            Delete Account
+          <button class="settings-tab" id="linked-tab" data-target="panel-linked-accounts">
+            <span class="tab-icon">🔗</span>
+            <span class="tab-label">Linked Accounts</span>
           </button>
-          <p class="danger-note">
-            This action is permanent and cannot be undone.
-          </p>
-        </div>
-      </main>
+          <button class="settings-tab" id="appearance-tab" data-target="panel-appearance">
+            <span class="tab-icon">🎨</span>
+            <span class="tab-label">Appearance</span>
+          </button>
+          <button class="settings-tab" id="privacy-tab" data-target="panel-privacy">
+            <span class="tab-icon">🛡️</span>
+            <span class="tab-label">Privacy</span>
+          </button>
+        </nav>
 
-      <!-- ── APPEARANCE PANEL ── -->
-      <main id="panel-appearance" class="tab-panel">
-        <div class="appearance-section">
-          <h3>Theme</h3>
-          <div class="toggle-row">
-            <span>Dark Mode</span>
-            <label class="toggle-switch">
-              <input type="checkbox" id="dark-mode-toggle" />
-              <span class="toggle-slider"></span>
-            </label>
-          </div>
+        <div class="sidebar-bottom">
+          <div id="logout-button" class="btn btn-gray"><h4>Log Out</h4></div>
         </div>
+      </aside>
 
-        <div class="appearance-section">
-          <h3>Accent Color</h3>
-          <div id="color-swatches">
-            <div
-              class="swatch"
-              data-color="#4285f4"
-              style="background: #4285f4"
-              title="Google Blue"
-            ></div>
-            <div
-              class="swatch"
-              data-color="#ea4335"
-              style="background: #ea4335"
-              title="Red"
-            ></div>
-            <div
-              class="swatch"
-              data-color="#34a853"
-              style="background: #34a853"
-              title="Green"
-            ></div>
-            <div
-              class="swatch"
-              data-color="#fbbc04"
-              style="background: #fbbc04"
-              title="Yellow"
-            ></div>
-            <div
-              class="swatch"
-              data-color="#9c27b0"
-              style="background: #9c27b0"
-              title="Purple"
-            ></div>
-            <div
-              class="swatch"
-              data-color="#00bcd4"
-              style="background: #00bcd4"
-              title="Cyan"
-            ></div>
-            <div
-              class="swatch"
-              data-color="#ff5722"
-              style="background: #ff5722"
-              title="Deep Orange"
-            ></div>
-            <div
-              class="swatch"
-              data-color="#607d8b"
-              style="background: #607d8b"
-              title="Blue Grey"
-            ></div>
-            <input
-              type="color"
-              id="custom-color-picker"
-              title="Custom color"
-              value="#4285f4"
-            />
-          </div>
+      <main class="settings-main">
+        <div class="main-header">
+          <h1>Profile</h1>
+          <p class="muted">Manage your public identity and account settings.</p>
         </div>
 
-        <div class="appearance-section">
-          <h3>Font Size</h3>
-          <div class="slider-row">
-            <span>Small</span>
-            <input
-              type="range"
-              id="font-size-slider"
-              min="12"
-              max="20"
-              step="1"
-              value="15"
-            />
-            <span>Large</span>
-          </div>
-          <p id="font-size-preview">
-            Preview text — This is how your messages look.
-          </p>
-        </div>
+        <!-- PROFILE PANEL -->
+        <section id="panel-profile" class="tab-panel active-panel">
+          <div class="profile-card">
+            <div class="card-hero">
+              <div id="pfp-section">
+                <div id="profile-pic-wrapper">
+                  <img id="profile-pic" src="../resources/anonymous.png" alt="Profile Picture" />
+                  <button id="change-pfp-btn" class="pfp-edit-btn" title="Change photo">✎</button>
+                </div>
+              </div>
 
-        <div class="appearance-section">
-          <h3>Chat Bubble Style</h3>
-          <div id="bubble-style-options">
-            <div
-              class="bubble-option active-bubble"
-              data-style="rounded"
-              id="style-rounded"
-            >
-              Rounded
+              <div class="hero-info">
+                <div class="profile-title-row">
+                  <div>
+                    <h2 id="profile-display-name">Your Name</h2>
+                    <p id="profile-bio-preview" class="muted">Short bio preview appears here.</p>
+                  </div>
+                  <div class="hero-actions">
+                    <div id="edit-profile-btn" class="btn btn-accent"><h4>Edit Profile</h4></div>
+                  </div>
+                </div>
+
+                <div class="hero-bio" id="hero-bio">
+                  <label for="bio-input">Bio</label>
+                  <textarea id="bio-input" maxlength="150" placeholder="Tell a little about yourself..." disabled></textarea>
+                  <div class="bio-meta"><span id="bio-char-count" aria-live="polite">0 / 150</span></div>
+                </div>
+              </div>
             </div>
-            <div class="bubble-option" data-style="square" id="style-square">
-              Square
+
+            <div class="card-body">
+              <div class="field-group">
+                <label for="display-name-input">Display Name</label>
+                <input type="text" id="display-name-input" maxlength="30" placeholder="eg: Cheesegobbler26" disabled />
+              </div>
             </div>
-            <div class="bubble-option" data-style="pill" id="style-pill">
-              Pill
+
+            <div class="card-footer">
+              <div id="edit-save-btns">
+                <div id="save-changes-btn" class="btn btn-accent" style="display:none"><h4>Save Changes</h4></div>
+                <div id="cancel-edit-btn" class="btn btn-gray" style="display:none"><h4>Cancel</h4></div>
+              </div>
             </div>
           </div>
-        </div>
+
+          <input type="file" id="pfp-file-input" accept="image/*" style="display: none" />
+        </section>
+
+        <!-- ACCOUNT PANEL -->
+        <section id="panel-account" class="tab-panel">
+          <div class="account-section">
+            <h3>Account Info</h3>
+            <div class="field-group">
+              <label>Email</label>
+              <p id="current-email" class="info-text">—</p>
+            </div>
+            <div class="field-group">
+              <label>Username</label>
+              <p id="current-username" class="info-text">—</p>
+            </div>
+            <div class="field-group">
+              <label>Member Since</label>
+              <p id="member-since" class="info-text">—</p>
+            </div>
+          </div>
+
+          <div class="account-section">
+            <h3>Change Email</h3>
+            <div class="field-group">
+              <label for="new-email-input">New Email</label>
+              <input type="email" id="new-email-input" placeholder="new@email.com" />
+            </div>
+            <div class="field-group">
+              <label for="email-pass-input">Current Password (required)</label>
+              <input type="password" id="email-pass-input" placeholder="Your current password" />
+            </div>
+            <button class="btn btn-accent" id="change-email-btn">Update Email</button>
+          </div>
+
+          <div class="account-section">
+            <h3>Change Password</h3>
+            <div class="field-group">
+              <label for="current-pass-input">Current Password</label>
+              <input type="password" id="current-pass-input" placeholder="Current password" />
+            </div>
+            <div class="field-group">
+              <label for="new-pass-input">New Password</label>
+              <input type="password" id="new-pass-input" placeholder="New password (min 6 chars)" />
+            </div>
+            <div class="field-group">
+              <label for="confirm-pass-input">Confirm New Password</label>
+              <input type="password" id="confirm-pass-input" placeholder="Confirm new password" />
+            </div>
+            <button class="btn btn-accent" id="change-pass-btn">Update Password</button>
+          </div>
+
+          <div class="account-section danger-zone">
+            <h3>Danger Zone</h3>
+            <button class="btn btn-danger" id="delete-account-btn">Delete Account</button>
+            <p class="danger-note">This action is permanent and cannot be undone.</p>
+          </div>
+        </section>
+
+        <!-- LINKED ACCOUNTS PANEL -->
+        <section id="panel-linked-accounts" class="tab-panel">
+          <div class="account-section">
+            <h3>Linked Accounts</h3>
+            <p class="muted">Connect social providers for faster sign-in and recovery.</p>
+
+            <div class="linked-account-row">
+              <div class="linked-info">
+                <div class="provider-icon">G</div>
+                <div>
+                  <strong>Google</strong>
+                  <div class="option-desc">Use Google to sign in and recover your account.</div>
+                </div>
+              </div>
+              <div class="linked-actions">
+                <button id="link-google-btn" class="btn btn-accent">Connect</button>
+              </div>
+            </div>
+
+            <div class="linked-account-row">
+              <div class="linked-info">
+                <div class="provider-icon">GH</div>
+                <div>
+                  <strong>GitHub</strong>
+                  <div class="option-desc">Use GitHub to sign in and link your profile.</div>
+                </div>
+              </div>
+              <div class="linked-actions">
+                <button id="link-github-btn" class="btn btn-accent">Connect</button>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- PRIVACY PANEL -->
+        <section id="panel-privacy" class="tab-panel">
+          <div class="account-section">
+            <h3>Privacy</h3>
+            <p class="muted">Control discoverability and data-sharing settings for your account.</p>
+
+            <div class="privacy-option">
+              <div>
+                <strong>Profile visibility</strong>
+                <div class="option-desc">Allow other users to see your profile and bio.</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="profile-visibility-toggle" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="privacy-option">
+              <div>
+                <strong>Searchability</strong>
+                <div class="option-desc">Allow your account to appear in username searches.</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="searchability-toggle" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="privacy-option">
+              <div>
+                <strong>Read receipts</strong>
+                <div class="option-desc">Allow others to see when you've read messages.</div>
+              </div>
+              <label class="toggle-switch">
+                <input type="checkbox" id="read-receipts-toggle" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="privacy-option">
+              <div>
+                <strong>Data export</strong>
+                <div class="option-desc">Request a copy of your account data (may take up to 48 hours).</div>
+              </div>
+              <div>
+                <button id="request-data-btn" class="btn btn-gray">Request</button>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- APPEARANCE PANEL -->
+        <section id="panel-appearance" class="tab-panel">
+          <div class="appearance-section">
+            <h3>Theme</h3>
+            <div class="toggle-row">
+              <span>Dark Mode</span>
+              <label class="toggle-switch">
+                <input type="checkbox" id="dark-mode-toggle" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="appearance-section">
+            <h3>Accent Color</h3>
+            <div id="color-swatches">
+              <div class="swatch" data-color="#4285f4" style="background: #4285f4" title="Google Blue"></div>
+              <div class="swatch" data-color="#ea4335" style="background: #ea4335" title="Red"></div>
+              <div class="swatch" data-color="#34a853" style="background: #34a853" title="Green"></div>
+              <div class="swatch" data-color="#fbbc04" style="background: #fbbc04" title="Yellow"></div>
+              <div class="swatch" data-color="#9c27b0" style="background: #9c27b0" title="Purple"></div>
+              <div class="swatch" data-color="#00bcd4" style="background: #00bcd4" title="Cyan"></div>
+              <div class="swatch" data-color="#ff5722" style="background: #ff5722" title="Deep Orange"></div>
+              <div class="swatch" data-color="#607d8b" style="background: #607d8b" title="Blue Grey"></div>
+              <input type="color" id="custom-color-picker" title="Custom color" value="#4285f4" />
+            </div>
+          </div>
+
+          <div class="appearance-section">
+            <h3>Font Size</h3>
+            <div class="slider-row">
+              <span>Small</span>
+              <input type="range" id="font-size-slider" min="12" max="20" step="1" value="15" />
+              <span>Large</span>
+            </div>
+            <p id="font-size-preview">Preview text — This is how your messages look.</p>
+          </div>
+
+          <div class="appearance-section">
+            <h3>Chat Bubble Style</h3>
+            <div id="bubble-style-options">
+              <div class="bubble-option active-bubble" data-style="rounded" id="style-rounded">Rounded</div>
+              <div class="bubble-option" data-style="square" id="style-square">Square</div>
+              <div class="bubble-option" data-style="pill" id="style-pill">Pill</div>
+            </div>
+          </div>
+        </section>
+
       </main>
-
-      <!-- Logout -->
-      <section id="logout-wrapper">
-        <div id="logout-button">
-          <h4>Log Out</h4>
-        </div>
-      </section>
-
-      <footer></footer>
     </div>
     <!-- .settings-container -->
 

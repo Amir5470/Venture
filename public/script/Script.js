@@ -199,7 +199,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
                 document.getElementById("add-friend-pf").addEventListener("click", () => sendFriendRequest(user.uid));
                 document.getElementById("message-friend-pf").addEventListener("click", () => {
-                    window.location.href = "chat.html";
+                    window.location.href = "/chat/";
                 });
                 document.getElementById("pf-search-back").addEventListener("click", handleSearch);
             });
@@ -230,7 +230,7 @@ window.addEventListener("DOMContentLoaded", () => {
             dmList.innerHTML = "";
 
             if (myDMs.length === 0) {
-                dmList.innerHTML = `<div class="empty-state"><div class="empty-icon">💬</div><p>No direct messages yet. Add a friend to get started.</p></div>`;
+                dmList.innerHTML = `<div class="empty-state"><div class="empty-icon">💬</div><p>No direct messages yet. Maybe get some friends.</p></div>`;
                 return;
             }
 
@@ -256,7 +256,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
                     item.addEventListener("click", () => {
                         closeSidebar();
-                        window.location.href = `../chat/?dm=${dm.id}`;
+                        window.location.href = `/chat/?dm=${dm.id}`;
                     });
                     dmList.appendChild(item);
                 });
@@ -312,7 +312,7 @@ window.addEventListener("DOMContentLoaded", () => {
                     item.addEventListener("click", (e) => {
                         if (e.target.closest(".gc-delete-btn")) return;
                         closeSidebar();
-                        window.location.href = `../chat/?gc=${gc.id}`;
+                        window.location.href = `/chat/?gc=${gc.id}`;
                     });
 
                     // Delete button
@@ -434,7 +434,7 @@ window.addEventListener("DOMContentLoaded", () => {
             );
 
             gcModalBackdrop.classList.remove("open");
-            window.location.href = `../chat/?gc=${gcId}`;
+            window.location.href = `/chat/?gc=${gcId}`;
         } catch (err) {
             console.error("Failed to create group chat:", err);
             alert("Something went wrong. Check the console.");

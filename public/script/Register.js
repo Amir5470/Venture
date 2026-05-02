@@ -4,9 +4,9 @@ import {
     GoogleAuthProvider,
     GithubAuthProvider,
     signInWithPopup,
-    signInWithEmailAndPassword,
-    onAuthStateChanged,
-    sendPasswordResetEmail
+    createUserWithEmailAndPassword,
+    updateProfile,
+    onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js"
 import { firebaseConfig } from "./secrets.js"
@@ -22,11 +22,11 @@ const GoogleBtn  = document.getElementById('GoogleBtn')
 const GithubBtn  = document.getElementById('GithubBtn')
 const submitform = document.getElementById('submitform')
 const emailinput = document.getElementById('email')
+const usernameinput = document.getElementById('username')
 const passinput  = document.getElementById('password')
-const forgotPasswordLink = document.getElementById('forgot-password-link')
 const formError = document.getElementById('form-error')
 
-// If already logged in, skip the login page entirely
+// If already logged in, skip the register page entirely
 onAuthStateChanged(auth, user => {
     if (user) go('/home/')
 })
@@ -65,47 +65,36 @@ GithubBtn.onclick = async () => {
     } catch (e) { handleError(e) }
 }
 
-// Forgot password handler
-forgotPasswordLink.onclick = async (e) => {
-    e.preventDefault()
-    const email = emailinput.value.trim()
-    if (!email) {
-        formError.textContent = 'Please enter your email first'
-        formError.style.display = 'block'
-        return
-    }
-    
-    try {
-        await sendPasswordResetEmail(auth, email)
-        formError.textContent = 'Password reset email sent! Check your inbox.'
-        formError.style.color = 'var(--online)'
-        formError.style.display = 'block'
-        setTimeout(() => {
-            formError.style.display = 'none'
-            formError.style.color = 'var(--danger)'
-        }, 5000)
-    } catch (e) {
-        handleError(e)
-    }
-}
-
 submitform.onclick = async () => {
     const emailVal = emailinput.value.trim()
+    const usernameVal = usernameinput.value.trim()
     const passVal  = passinput.value.trim()
     
     formError.style.display = 'none'
     formError.textContent = ''
     
-    if (!emailVal || !passVal) {
+    if (!emailVal || !usernameVal || !passVal) {
         formError.textContent = 'Please fill in all fields'
         formError.style.display = 'block'
         return
     }
     
+    if (passVal.length < 6) {
+        formError.textContent = 'Password must be at least 6 characters'
+        formError.style.display = 'block'
+        return
+    }
+    
     try {
-        const res = await signInWithEmailAndPassword(auth, emailVal, passVal)
-        await saveUserData(res.user)
+        const userCred = await createUserWithEmailAndPassword(auth, emailVal, passVal)
+        await updateProfile(userCred.user, { displayName: usernameVal })
+        await saveUserData(userCred.user)
         go('/home/')
-    } catch (e) { handleError(e) }
+    } catch (e) {
+        if (e.code === 'auth/email-already-in-use') {
+            formError.textContent = 'This email is already registered. <a href="/login/" style="color: var(--accent);">Login instead</a>'
+            formError.innerHTML = 'This email is already registered. <a href="/login/" style="color: var(--accent); text-decoration: underline;">Login instead</a>'
+        }
+        handleError(e)
+    }
 }
-

@@ -898,6 +898,7 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:18px;
 }
 
 #userpassfield,
+#registerfield,
 #signuppage {
   display: flex;
   flex-direction: column;
@@ -909,10 +910,9 @@ input[type="password"],
 input[type="text"] {
   padding: 10px 12px;
   border-radius: 10px;
-  border: none;
-  outline: none;
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-primary);
   font-size: 14px;
 }
 

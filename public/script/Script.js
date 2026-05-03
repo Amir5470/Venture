@@ -62,7 +62,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // ── Auth ──────────────────────────────────────────────────────────────────
     onAuthStateChanged(auth, user => {
-        if (!user) { go("./index.html"); return; }
+        if (!user) { go('/'); return; }
         currentUser = user;
         loadDMs();
         loadGroupChats();

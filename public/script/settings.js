@@ -137,7 +137,7 @@ onAuthStateChanged(auth, async (user) => {
       refreshLinkedButtons();
       return;
     }
-    go("./index.html");
+    go('/');
     return;
   }
   currentUser = user;
@@ -444,7 +444,7 @@ $("delete-account-btn").addEventListener("click", async () => {
     const cred = EmailAuthProvider.credential(currentUser.email, pass);
     await reauthenticateWithCredential(currentUser, cred);
     await deleteUser(currentUser);
-    go("./index.html");
+    go('/');
   } catch (e) {
     console.error(e);
     toast(friendlyError(e.code), true);
@@ -454,7 +454,7 @@ $("delete-account-btn").addEventListener("click", async () => {
 // ── Logout ────────────────────────────────────────────────────────────────────
 $("logout-button").addEventListener("click", async () => {
   await signOut(auth);
-  go("./index.html");
+  go('/');
 });
 
 // ── Appearance: dark mode ─────────────────────────────────────────────────────

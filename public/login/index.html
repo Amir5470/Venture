@@ -74,7 +74,7 @@
           <button type="button" id="forgot-password-link" style="background: none; border: none; color: var(--accent); cursor: pointer; text-decoration: underline; padding: 0; font-weight: 500;">Forgot password?</button>
         </div>
         <p id="form-error" style="color: var(--danger); font-size: 13px; margin: 8px 0 0 0; display: none;"></p>
-        <button type="submit" class="login-btn" id="submitform">Login</button>
+        <button type="button" class="login-btn" id="submitform">Login</button>
       </div>
 
       <!-- divider -->
@@ -117,17 +117,17 @@
     <script>
           const TURNSTILE_VERIFY_URL = "https://venture.amirmechkour5474.workers.dev/"; // <- replace with your worker URL
           const submitform = document.getElementById("submitform");
-          submitform.disabled = true; // Disable the submit button by default
+          if (submitform) submitform.disabled = true; // Disable the submit button by default
           const registerBtn = document.getElementById("registerBtn");
-          registerBtn.disabled = true; // Disable the register button by default
+          if (registerBtn) registerBtn.disabled = true; // Disable the register button by default
 
     async function onTurnstileSuccess(token) {
       // Local development bypass: enable buttons without verifying Turnstile.
       // Safe because this only triggers on localhost/127.0.0.1/::1.
       if (location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.hostname === '::1') {
         console.log('Local dev: enabling submit/register (Turnstile bypass).');
-        document.getElementById("submitform").disabled = false;
-        document.getElementById("registerBtn").disabled = false;
+        if (document.getElementById("submitform")) document.getElementById("submitform").disabled = false;
+        if (document.getElementById("registerBtn")) document.getElementById("registerBtn").disabled = false;
         return;
       }
 
@@ -140,17 +140,17 @@
         });
         const data = await resp.json();
         if (data && data.success) {
-          document.getElementById("submitform").disabled = false;
-          document.getElementById("registerBtn").disabled = false;
+          if (document.getElementById("submitform")) document.getElementById("submitform").disabled = false;
+          if (document.getElementById("registerBtn")) document.getElementById("registerBtn").disabled = false;
         } else {
           console.error('Turnstile verification failed', data);
-          document.getElementById("submitform").disabled = true;
-          document.getElementById("registerBtn").disabled = true;
+          if (document.getElementById("submitform")) document.getElementById("submitform").disabled = true;
+          if (document.getElementById("registerBtn")) document.getElementById("registerBtn").disabled = true;
         }
       } catch (e) {
         console.error('Verify request failed', e);
-        document.getElementById("submitform").disabled = true;
-        document.getElementById("registerBtn").disabled = true;
+        if (document.getElementById("submitform")) document.getElementById("submitform").disabled = true;
+        if (document.getElementById("registerBtn")) document.getElementById("registerBtn").disabled = true;
       }
     }
     function onTurnstileError(errorCode) {

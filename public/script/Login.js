@@ -17,6 +17,15 @@ const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
 const fs = getFirestore(app)
 
+function getContinueUrl() {
+    const defaultLocal = 'http://localhost:5000'
+    const origin = (window.location && (window.location.protocol === 'file:' || !window.location.origin || window.location.origin === 'null'))
+        ? defaultLocal
+        : window.location.origin
+    const base = (origin + (window.siteBase || '')).replace(/\/$/, '')
+    return base + '/verify/'
+}
+
 const googleProvider = new GoogleAuthProvider()
 const githubProvider = new GithubAuthProvider()
 
@@ -37,8 +46,7 @@ onAuthStateChanged(auth, user => {
     }
 
     // If user is signed in but not verified, send verification and redirect to verify page
-    const base = window.location.origin + (window.siteBase || '')
-    const continueUrl = base.replace(/\/$/, '') + '/verify/'
+    const continueUrl = getContinueUrl()
     sendEmailVerification(user, { url: continueUrl }).catch(() => {})
     signOut(auth).catch(() => {})
     go('/verify/?sent=1')
@@ -120,8 +128,7 @@ submitform.onclick = async () => {
         await saveUserData(res.user)
 
         if (!res.user.emailVerified) {
-            const base = window.location.origin + (window.siteBase || '')
-            const continueUrl = base.replace(/\/$/, '') + '/verify/'
+            const continueUrl = getContinueUrl()
             try { await sendEmailVerification(res.user, { url: continueUrl }) } catch (err) { console.error('sendEmailVerification', err) }
             await signOut(auth)
             formError.textContent = 'Please verify your email address. A verification email has been sent.'

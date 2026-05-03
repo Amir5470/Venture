@@ -18,6 +18,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "firebase deploy",
+    "serve": "npx http-server public -p 5000",
     "open": "electron ."
   },
   "dependencies": {

@@ -17,6 +17,15 @@ const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
 const fs = getFirestore(app)
 
+function getContinueUrl() {
+    const defaultLocal = 'http://localhost:5000'
+    const origin = (window.location && (window.location.protocol === 'file:' || !window.location.origin || window.location.origin === 'null'))
+        ? defaultLocal
+        : window.location.origin
+    const base = (origin + (window.siteBase || '')).replace(/\/$/, '')
+    return base + '/verify/'
+}
+
 const googleProvider = new GoogleAuthProvider()
 const githubProvider = new GithubAuthProvider()
 
@@ -95,8 +104,7 @@ submitform.onclick = async () => {
         await saveUserData(userCred.user)
 
         // Send email verification and redirect to verification info page
-        const base = window.location.origin + (window.siteBase || '')
-        const continueUrl = base.replace(/\/$/, '') + '/verify/'
+        const continueUrl = getContinueUrl()
         try {
             await sendEmailVerification(userCred.user, { url: continueUrl })
         } catch (err) {

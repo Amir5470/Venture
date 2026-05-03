@@ -198,8 +198,24 @@ window.addEventListener("DOMContentLoaded", () => {
                     </div>`;
 
                 document.getElementById("add-friend-pf").addEventListener("click", () => sendFriendRequest(user.uid));
-                document.getElementById("message-friend-pf").addEventListener("click", () => {
-                    go('/chat/')
+                document.getElementById("message-friend-pf").addEventListener("click", async () => {
+                    if (!currentUser) { alert("Please sign in to message users."); return; }
+                    const dmId = [currentUser.uid, user.uid].sort().join("_");
+                    const dmRef = ref(rtdb, `dms/${dmId}`);
+                    try {
+                        const snap = await get(dmRef);
+                        if (!snap.exists()) {
+                            const targetName = user.username || user.uid;
+                            const myName = currentUser.displayName || (currentUser.email || "").split("@")[0];
+                            await set(dmRef, {
+                                members: { [currentUser.uid]: myName, [user.uid]: targetName },
+                                lastMessage: "",
+                                lastAt: Date.now(),
+                                createdAt: Date.now()
+                            });
+                        }
+                    } catch (err) { console.error("Create DM error:", err); }
+                    go(`/chat/?dm=${dmId}`);
                 });
                 document.getElementById("pf-search-back").addEventListener("click", handleSearch);
             });

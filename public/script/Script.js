@@ -367,11 +367,14 @@ window.addEventListener("DOMContentLoaded", () => {
                             try {
                                 // Remove from RTDB
                                 await remove(ref(rtdb, `groupChats/${gc.id}`));
-                                // Remove gcId from each member's Firestore doc
-                                const memberUids = Object.keys(gc.members || {});
-                                await Promise.all(memberUids.map(uid =>
-                                    updateDoc(doc(fs, "users", uid), { groupChats: arrayRemove(gc.id) })
-                                ));
+                                    // Only remove the group from the current user's Firestore doc.
+                                    // Removing it from other users' Firestore docs requires
+                                    // privileged server-side logic or relaxed rules.
+                                    try {
+                                        await updateDoc(doc(fs, "users", currentUser.uid), { groupChats: arrayRemove(gc.id) });
+                                    } catch (e) {
+                                        console.warn('Could not remove gcId from current user Firestore doc', e);
+                                    }
                             } catch (err) {
                                 console.error("Delete GC error:", err);
                                 alert("Failed to delete group chat.");
@@ -471,11 +474,16 @@ window.addEventListener("DOMContentLoaded", () => {
                 createdBy: currentUser.uid
             });
 
-            await Promise.all(
-                Object.keys(membersMap).map(uid =>
-                    updateDoc(doc(fs, "users", uid), { groupChats: arrayUnion(gcId) })
-                )
-            );
+                // Only update the current user's Firestore doc to avoid
+                // writing to other users' documents which may be blocked by
+                // Firestore security rules. Other members will see the group
+                // because it's stored in RTDB under `groupChats/{gcId}`.
+                try {
+                    await updateDoc(doc(fs, "users", currentUser.uid), { groupChats: arrayUnion(gcId) });
+                } catch (e) {
+                    // Non-fatal: fail quietly but log for debugging
+                    console.warn('Could not update current user Firestore doc with gcId', e);
+                }
 
             gcModalBackdrop.classList.remove("open");
             go(`/chat/?gc=${gcId}`)

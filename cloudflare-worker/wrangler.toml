@@ -1,5 +1,11 @@
+
+name = "venture"
+
+compatibility_date = "2026-05-03"
+main = "index.js"
+
 [env]
-name = "venture-turnstile-verify"
+name = "venture"
 type = "javascript"
 
 [vars]

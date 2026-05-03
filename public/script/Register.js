@@ -6,7 +6,9 @@ import {
     signInWithPopup,
     createUserWithEmailAndPassword,
     updateProfile,
-    onAuthStateChanged
+    onAuthStateChanged,
+    sendEmailVerification,
+    signOut
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js"
 import { firebaseConfig } from "./secrets.js"
@@ -28,7 +30,9 @@ const formError = document.getElementById('form-error')
 
 // If already logged in, skip the register page entirely
 onAuthStateChanged(auth, user => {
-    if (user) go('/home/')
+    if (!user) return
+    if (user.emailVerified) go('/home/')
+    // otherwise stay on the verify/register flow
 })
 
 // Save user to Firestore
@@ -69,31 +73,40 @@ submitform.onclick = async () => {
     const emailVal = emailinput.value.trim()
     const usernameVal = usernameinput.value.trim()
     const passVal  = passinput.value.trim()
-    
+
     formError.style.display = 'none'
     formError.textContent = ''
-    
+
     if (!emailVal || !usernameVal || !passVal) {
         formError.textContent = 'Please fill in all fields'
         formError.style.display = 'block'
         return
     }
-    
+
     if (passVal.length < 6) {
         formError.textContent = 'Password must be at least 6 characters'
         formError.style.display = 'block'
         return
     }
-    
+
     try {
         const userCred = await createUserWithEmailAndPassword(auth, emailVal, passVal)
         await updateProfile(userCred.user, { displayName: usernameVal })
         await saveUserData(userCred.user)
-        go('/home/')
+
+        // Send email verification and redirect to verification info page
+        const base = window.location.origin + (window.siteBase || '')
+        const continueUrl = base.replace(/\/$/, '') + '/verify/'
+        try {
+            await sendEmailVerification(userCred.user, { url: continueUrl })
+        } catch (err) {
+            console.error('Failed to send verification email', err)
+        }
+        await signOut(auth)
+        go('/verify/?sent=1')
     } catch (e) {
         if (e.code === 'auth/email-already-in-use') {
-            formError.textContent = 'This email is already registered. <a href="/login/" style="color: var(--accent);">Login instead</a>'
-            formError.innerHTML = 'This email is already registered. <a href="/login/" style="color: var(--accent); text-decoration: underline;">Login instead</a>'
+            formError.innerHTML = 'This email is already registered. <a href="/login/" onclick="event.preventDefault(); go(\'/login/\');" style="color: var(--accent); text-decoration: underline;">Login instead</a>'
         }
         handleError(e)
     }

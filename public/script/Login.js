@@ -6,7 +6,9 @@ import {
     signInWithPopup,
     signInWithEmailAndPassword,
     onAuthStateChanged,
-    sendPasswordResetEmail
+    sendPasswordResetEmail,
+    sendEmailVerification,
+    signOut
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js"
 import { firebaseConfig } from "./secrets.js"
@@ -28,7 +30,18 @@ const formError = document.getElementById('form-error')
 
 // If already logged in, skip the login page entirely
 onAuthStateChanged(auth, user => {
-    if (user) go('/home/')
+    if (!user) return
+    if (user.emailVerified) {
+        go('/home/')
+        return
+    }
+
+    // If user is signed in but not verified, send verification and redirect to verify page
+    const base = window.location.origin + (window.siteBase || '')
+    const continueUrl = base.replace(/\/$/, '') + '/verify/'
+    sendEmailVerification(user, { url: continueUrl }).catch(() => {})
+    signOut(auth).catch(() => {})
+    go('/verify/?sent=1')
 })
 
 // Save user to Firestore
@@ -105,6 +118,17 @@ submitform.onclick = async () => {
     try {
         const res = await signInWithEmailAndPassword(auth, emailVal, passVal)
         await saveUserData(res.user)
+
+        if (!res.user.emailVerified) {
+            const base = window.location.origin + (window.siteBase || '')
+            const continueUrl = base.replace(/\/$/, '') + '/verify/'
+            try { await sendEmailVerification(res.user, { url: continueUrl }) } catch (err) { console.error('sendEmailVerification', err) }
+            await signOut(auth)
+            formError.textContent = 'Please verify your email address. A verification email has been sent.'
+            formError.style.display = 'block'
+            return
+        }
+
         go('/home/')
     } catch (e) { handleError(e) }
 }

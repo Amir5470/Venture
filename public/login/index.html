@@ -70,7 +70,7 @@
         <label for="password" style="text-align: left">Password</label>
         <input type="password" id="password" placeholder="ie: password123" />
         <div id="form-actions" style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
-          <a href="/register/" style="color: var(--accent); text-decoration: underline; font-weight: 500;">Create an account</a>
+          <a href="/register/" onclick="event.preventDefault(); go('/register/');" style="color: var(--accent); text-decoration: underline; font-weight: 500;">Create an account</a>
           <button type="button" id="forgot-password-link" style="background: none; border: none; color: var(--accent); cursor: pointer; text-decoration: underline; padding: 0; font-weight: 500;">Forgot password?</button>
         </div>
         <p id="form-error" style="color: var(--danger); font-size: 13px; margin: 8px 0 0 0; display: none;"></p>

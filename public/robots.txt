@@ -1,0 +1,7 @@
+# robots.txt for Venture
+# Allow all crawlers. Replace the Sitemap URL below with your canonical domain if needed.
+User-agent: *
+Allow: /
+
+# Sitemap location (replace with your domain if this is not the canonical URL)
+Sitemap: https://venture-chat.web.app/sitemap.xml

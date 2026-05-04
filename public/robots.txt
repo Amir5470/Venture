@@ -4,4 +4,4 @@ User-agent: *
 Allow: /
 
 # Sitemap location (replace with your domain if this is not the canonical URL)
-Sitemap: https://venture-chat.web.app/sitemap.xml
+Sitemap: https://venture-chat.site/sitemap.xml

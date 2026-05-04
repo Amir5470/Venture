@@ -8,7 +8,7 @@ A real-time chat app built with Firebase and pure web tech.
 - Custom user profiles & friend list   
 
 ## 🌐 Live Website  
-👉 [https://venture-chat.web.app](https://venture-chat.web.app)
+👉 [https://venture-chat.site](https://venture-chat.site)
 
 ## 🔧 Tech Stack
 - **Frontend**: HTML, CSS, JavaScript  
@@ -30,4 +30,3 @@ MIT License — see [LICENSE](LICENSE)
 Created by **Amir5470**  
 Co-Authored by **Johnklewissscell** ([GitHub](https://github.com/johnklewissscell))
 Check out more projects on [GitHub](https://github.com/Amir5470)
-

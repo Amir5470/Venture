@@ -177,10 +177,15 @@ window.addEventListener("DOMContentLoaded", () => {
                 </div>`;
             resultsContainer.appendChild(userDiv);
 
-            userDiv.addEventListener("click", () => {
-                resultsContainer.innerHTML = `
+                userDiv.addEventListener("click", () => {
+                    const pfpUrl = user.pfp || user.photoURL || null;
+                    const avatarHtml = pfpUrl
+                        ? `<img id="pf-search-img" src="${escapeHtml(pfpUrl)}" alt="${escapeHtml(user.username)}" class="pf-avatar-img" />`
+                        : `<div class="pf-avatar-lg">${getInitials(user.username)}</div>`;
+
+                    resultsContainer.innerHTML = `
                     <div id="pf-search-container">
-                        <div class="pf-avatar-lg">${getInitials(user.username)}</div>
+                        <div id="pf-avatar-wrapper">${avatarHtml}</div>
                         <h2 id="pf-search-h2">${escapeHtml(user.username)}</h2>
                         <div class="pf-detail-row">
                             <span class="pf-detail-label">Email</span>
@@ -197,28 +202,39 @@ window.addEventListener("DOMContentLoaded", () => {
                         <button id="pf-search-back">← Back to results</button>
                     </div>`;
 
-                document.getElementById("add-friend-pf").addEventListener("click", () => sendFriendRequest(user.uid));
-                document.getElementById("message-friend-pf").addEventListener("click", async () => {
-                    if (!currentUser) { alert("Please sign in to message users."); return; }
-                    const dmId = [currentUser.uid, user.uid].sort().join("_");
-                    const dmRef = ref(rtdb, `dms/${dmId}`);
-                    try {
-                        const snap = await get(dmRef);
-                        if (!snap.exists()) {
-                            const targetName = user.username || user.uid;
-                            const myName = currentUser.displayName || (currentUser.email || "").split("@")[0];
-                            await set(dmRef, {
-                                members: { [currentUser.uid]: myName, [user.uid]: targetName },
-                                lastMessage: "",
-                                lastAt: Date.now(),
-                                createdAt: Date.now()
+                    // If image fails to load, fall back to initials
+                    if (pfpUrl) {
+                        const img = document.getElementById('pf-search-img');
+                        if (img) {
+                            img.addEventListener('error', () => {
+                                const wrapper = document.getElementById('pf-avatar-wrapper');
+                                if (wrapper) wrapper.innerHTML = `<div class="pf-avatar-lg">${getInitials(user.username)}</div>`;
                             });
                         }
-                    } catch (err) { console.error("Create DM error:", err); }
-                    go(`/chat/?dm=${dmId}`);
+                    }
+
+                    document.getElementById("add-friend-pf").addEventListener("click", () => sendFriendRequest(user.uid));
+                    document.getElementById("message-friend-pf").addEventListener("click", async () => {
+                        if (!currentUser) { alert("Please sign in to message users."); return; }
+                        const dmId = [currentUser.uid, user.uid].sort().join("_");
+                        const dmRef = ref(rtdb, `dms/${dmId}`);
+                        try {
+                            const snap = await get(dmRef);
+                            if (!snap.exists()) {
+                                const targetName = user.username || user.uid;
+                                const myName = currentUser.displayName || (currentUser.email || "").split("@")[0];
+                                await set(dmRef, {
+                                    members: { [currentUser.uid]: myName, [user.uid]: targetName },
+                                    lastMessage: "",
+                                    lastAt: Date.now(),
+                                    createdAt: Date.now()
+                                });
+                            }
+                        } catch (err) { console.error("Create DM error:", err); }
+                        go(`/chat/?dm=${dmId}`);
+                    });
+                    document.getElementById("pf-search-back").addEventListener("click", handleSearch);
                 });
-                document.getElementById("pf-search-back").addEventListener("click", handleSearch);
-            });
         });
     };
 

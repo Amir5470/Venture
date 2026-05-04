@@ -1,12 +1,40 @@
 {
-  "name": "Venture",
+  "name": "Venture — Real-Time Chat",
   "short_name": "Venture",
+  "description": "Venture is a lightweight, browser-based real-time chat app.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#ffffff",
   "theme_color": "#3b6ef5",
   "icons": [
-    { "src": "/resources/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/resources/icon-512.png", "sizes": "512x512", "type": "image/png" }
+    {
+      "src": "/resources/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/resources/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["social", "communications"],
+  "shortcuts": [
+    {
+      "name": "Open Chat",
+      "short_name": "Chat",
+      "url": "/chat/",
+      "description": "Open your chats"
+    },
+    {
+      "name": "Find People",
+      "short_name": "Find",
+      "url": "/home/",
+      "description": "Search for people on Venture"
+    }
   ]
 }

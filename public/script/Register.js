@@ -11,7 +11,8 @@ import {
     signOut
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"
 import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js"
-import { firebaseConfig } from "./secrets.js"
+import { firebaseConfig, WORKER_URL } from "./secrets.js"
+import { sanitizeString, isValidEmail } from './sanitizer.js'
 
 const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
@@ -62,8 +63,31 @@ const handleError = e => {
     console.error(e)
 }
 
+async function checkAuthAttempt(action, identifier) {
+    if (!WORKER_URL) return { allowed: true }
+    const id = sanitizeString(identifier || '', 256)
+    if (id === null) return { allowed: false, error: 'identifier_too_long' }
+    try {
+        const res = await fetch(`${WORKER_URL.replace(/\/$/, '')}/auth/attempt`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action, identifier: id })
+        })
+        if (!res.ok) {
+            if (res.status === 429) return { allowed: false, retryAfter: res.headers.get('Retry-After') }
+            return { allowed: true }
+        }
+        const j = await res.json()
+        return { allowed: !!j.allowed, remaining: j.remaining }
+    } catch (err) {
+        console.warn('Auth attempt check failed', err)
+        return { allowed: true }
+    }
+}
+
 GoogleBtn.onclick = async () => {
     try {
+        const ok = await checkAuthAttempt('oauth', '')
+        if (!ok.allowed) { handleError({ message: 'Too many auth attempts. Try again later.' }); return }
         const res = await signInWithPopup(auth, googleProvider)
         await saveUserData(res.user)
         go('/home/')
@@ -72,6 +96,8 @@ GoogleBtn.onclick = async () => {
 
 GithubBtn.onclick = async () => {
     try {
+        const ok = await checkAuthAttempt('oauth', '')
+        if (!ok.allowed) { handleError({ message: 'Too many auth attempts. Try again later.' }); return }
         const res = await signInWithPopup(auth, githubProvider)
         await saveUserData(res.user)
         go('/home/')
@@ -79,15 +105,21 @@ GithubBtn.onclick = async () => {
 }
 
 submitform.onclick = async () => {
-    const emailVal = emailinput.value.trim()
-    const usernameVal = usernameinput.value.trim()
-    const passVal  = passinput.value.trim()
+    const emailVal = sanitizeString(emailinput.value, 256)
+    const usernameVal = sanitizeString(usernameinput.value, 64)
+    const passVal  = sanitizeString(passinput.value, 256)
 
     formError.style.display = 'none'
     formError.textContent = ''
 
     if (!emailVal || !usernameVal || !passVal) {
         formError.textContent = 'Please fill in all fields'
+        formError.style.display = 'block'
+        return
+    }
+
+    if (!isValidEmail(emailVal)) {
+        formError.textContent = 'Please enter a valid email address'
         formError.style.display = 'block'
         return
     }
@@ -99,6 +131,8 @@ submitform.onclick = async () => {
     }
 
     try {
+        const ok = await checkAuthAttempt('register', emailVal)
+        if (!ok.allowed) { handleError({ message: 'Too many registration attempts. Try again later.' }); return }
         const userCred = await createUserWithEmailAndPassword(auth, emailVal, passVal)
         await updateProfile(userCred.user, { displayName: usernameVal })
         await saveUserData(userCred.user)
@@ -114,7 +148,16 @@ submitform.onclick = async () => {
         go('/verify/?sent=1')
     } catch (e) {
         if (e.code === 'auth/email-already-in-use') {
-            formError.innerHTML = 'This email is already registered. <a href="/login/" onclick="event.preventDefault(); go(\'/login/\');" style="color: var(--accent); text-decoration: underline;">Login instead</a>'
+            formError.textContent = 'This email is already registered.'
+            const a = document.createElement('a')
+            a.textContent = ' Login instead'
+            a.href = '/login/'
+            a.style.color = 'var(--accent)'
+            a.style.textDecoration = 'underline'
+            a.addEventListener('click', (ev) => { ev.preventDefault(); go('/login/') })
+            formError.appendChild(a)
+            formError.style.display = 'block'
+            return
         }
         handleError(e)
     }

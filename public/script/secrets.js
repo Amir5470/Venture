@@ -9,3 +9,8 @@ apiKey: "AIzaSyCcyZWnDpweRh7x-oEPtb7rcLy2Bh3Eo_E",
     appId: "1:528529467639:web:8b8cb7a6b4d404ed074bf2",
     measurementId: "G-JXMEC88ELT"
 }
+
+// Optional: Base URL for the Cloudflare Worker that enforces rate limits.
+// Set this to the deployed worker URL (e.g. "https://venture.example.workers.dev")
+// If empty, client-side code will skip server-side attempt checks.
+export const WORKER_URL = "";

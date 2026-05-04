@@ -7,6 +7,7 @@ import { getFirestore, collection, addDoc, getDoc, doc }
                               from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js"
 
 import { firebaseConfig }     from "./secrets.js"
+import { sanitizeString } from './sanitizer.js'
 
 // ── Firebase ──────────────────────────────────────────────────────────────────
 const app  = initializeApp(firebaseConfig)
@@ -251,7 +252,8 @@ async function createBubble(data) {
     const avatar     = document.createElement("img")
     avatar.className = "bubble-avatar"
     avatar.alt       = data.name || "anon"
-    avatar.src       = data.pfp || (await getPfp(data.uid)) || "resources/anonymous.png"
+    avatar.src       = data.pfp || (await getPfp(data.uid)) || "/resources/anonymous.png"
+    avatar.addEventListener('error', () => { if (avatar.src !== '/resources/anonymous.png') avatar.src = '/resources/anonymous.png' })
 
     const bubble     = document.createElement("div")
     bubble.className = `bubble ${isSent ? "sent" : "received"}`
@@ -300,7 +302,8 @@ async function createBubble(data) {
 
 // ── Send text ─────────────────────────────────────────────────────────────────
 function sendMessage() {
-    const text = msgInput?.value?.trim()
+    const text = sanitizeString(msgInput?.value || '', 2000)
+    if (text === null) { showToast('Message is too long.', true); return }
     if (!text || !uid) return
     const payload = { type: "text", text, name: username, uid, pfp: myPfp || null, time: Date.now() }
     if (replyTo) {

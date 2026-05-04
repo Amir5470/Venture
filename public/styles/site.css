@@ -1804,6 +1804,119 @@ input:checked + .slider:before {
   background: var(--surface-2);
 }
 
+/* Modal internals: lists, rows, actions */
+.modal .modal-user-results,
+.modal .modal-user-results-af,
+.modal #modal-user-results,
+.modal #af-results {
+  margin-top: 10px;
+  max-height: 340px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-right: 6px; /* accommodate scrollbar */
+}
+
+.modal-user-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  transition: background 0.12s ease, transform 0.12s ease;
+}
+.modal-user-row:hover { background: var(--surface-2); transform: translateY(-1px); }
+
+.modal-user-row .user-info { flex: 1; min-width: 0; }
+.modal-user-row .user-info h3 { font-size: 14px; font-weight: 600; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.modal-user-row .user-info p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+.add-btn,
+.remove-btn,
+.req-accept-btn,
+.req-reject-btn {
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.add-btn { background: var(--accent); color: #fff; box-shadow: var(--shadow-xs); }
+.add-btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+
+.remove-btn { background: var(--surface-2); color: var(--text-secondary); border: 1px solid var(--border); }
+.remove-btn:hover { background: var(--surface-3); }
+
+.req-accept-btn { background: var(--online); color: #fff; }
+.req-accept-btn:hover { filter: brightness(0.95); }
+.req-reject-btn { background: var(--surface-2); color: var(--text-secondary); border: 1px solid var(--border); }
+
+.member-chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); margin: 6px 6px 0 0; font-weight: 600; color: var(--text-primary); }
+.member-chip .chip-x { background: transparent; border-radius: 6px; padding: 2px 6px; cursor: pointer; margin-left: 6px; color: var(--text-muted); }
+
+.modal .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+.modal button { font-family: var(--font); }
+
+/* Profile/preview buttons */
+.pf-search-container { display: flex; flex-direction: column; gap: 12px; }
+.pf-detail-row { display: flex; gap: 12px; align-items: center; }
+.pf-actions { display: flex; gap: 10px; margin-top: 6px; }
+.pf-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; font-weight: 700; border: none; cursor: pointer; margin-right: 8px; font-size: 14px; }
+.pf-btn.primary { background: var(--accent); color: #fff; box-shadow: var(--shadow-accent); }
+.pf-btn.primary:hover { background: var(--accent-hover); }
+.pf-btn.secondary { background: var(--surface-2); color: var(--text-primary); border: 1px solid var(--border); }
+
+/* Back-to-results and other small profile buttons */
+#pf-search-container #pf-search-back,
+#pf-search-container button[aria-role="back"] {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+}
+#pf-search-container #pf-search-back:hover { background: var(--surface-3); }
+
+/* Ensure modal action buttons get decent default styling */
+.modal .modal-actions button,
+.modal button {
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.modal .modal-actions button.primary,
+.modal button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* Friend request rows */
+.request-row { display: flex; gap: 12px; align-items: center; padding: 10px; border-radius: 10px; }
+.request-avatar { width: 44px; height: 44px; border-radius: 10px; background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+.request-info { flex: 1; min-width: 0; }
+.request-name { font-weight: 700; color: var(--text-primary); }
+.request-sub { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+.request-actions { display:flex; gap:8px; }
+
+/* Make modal inputs slightly larger and spaced */
+.modal-input { font-size: 15px; margin-bottom: 10px; }
+
+/* Ensure small modals look balanced on narrow screens */
+@media (max-width: 520px) {
+  .modal { padding: 14px; border-radius: 12px; }
+  .add-btn, .remove-btn, .pf-btn { padding: 8px 10px; font-size: 13px; }
+}
+
 /* Responsive adjustments */
 @media (max-width: 900px) {
   :root {

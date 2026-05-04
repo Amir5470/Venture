@@ -10,3 +10,7 @@ type = "javascript"
 
 [vars]
 # No secrets stored here; use `wrangler secret put TURNSTILE_SECRET` to set the secret
+
+[[kv_namespaces]]
+binding = "RATE_KV"
+id = "" # set your KV namespace id here before publishing

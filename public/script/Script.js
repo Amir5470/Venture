@@ -284,24 +284,37 @@ window.addEventListener("DOMContentLoaded", () => {
                 const item = document.createElement("div");
                 item.className = "conv-item";
 
-                let avatarHtml;
-                if (pfpUrl) {
-                    avatarHtml = `<div class="conv-avatar"><img src="${escapeHtml(pfpUrl)}" alt="${escapeHtml(otherName)}"><div class="online-dot"></div></div>`;
-                } else {
-                    avatarHtml = `<div class="conv-avatar">${escapeHtml(initials)}<div class="online-dot"></div></div>`;
-                }
+                // Build avatar element (use real DOM so we can attach error handlers)
+                const avatarEl = document.createElement("div");
+                avatarEl.className = "conv-avatar";
 
-                item.innerHTML = `
-                    ${avatarHtml}
-                    <div class="conv-info">
-                        <div class="conv-name">${escapeHtml(otherName)}</div>
-                        <div class="conv-preview">${escapeHtml(dm.lastMessage || "No messages yet")}</div>
-                    </div>`;
+                if (pfpUrl) {
+                    const img = document.createElement("img");
+                    img.src = pfpUrl;
+                    img.alt = otherName;
+                    img.addEventListener('error', () => { img.src = '/resources/anonymous.png'; });
+                    avatarEl.appendChild(img);
+                } else {
+                    avatarEl.textContent = initials;
+                }
+                const onlineDot = document.createElement("div");
+                onlineDot.className = "online-dot";
+                avatarEl.appendChild(onlineDot);
+
+                const infoEl = document.createElement("div");
+                infoEl.className = "conv-info";
+                infoEl.innerHTML = `
+                    <div class="conv-name">${escapeHtml(otherName)}</div>
+                    <div class="conv-preview">${escapeHtml(dm.lastMessage || "No messages yet")}</div>`;
+
+                item.appendChild(avatarEl);
+                item.appendChild(infoEl);
 
                 item.addEventListener("click", () => {
                     closeSidebar();
                     go(`/chat/?dm=${dm.id}`)
                 });
+
                 dmList.appendChild(item);
             }
         }, err => console.error("DMs onValue error", err));

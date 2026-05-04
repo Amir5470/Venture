@@ -20,3 +20,13 @@ Thumbs.db
 
 # optional env files
 .env
+
+.github/
+/.github/
+
+# Firebase local files
+firebase/
+.firebase/
+
+# Tools directory
+tools/

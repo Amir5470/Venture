@@ -542,7 +542,7 @@ body.dark header, body.dark .header-icon-btn, body.dark header button {
   display: block;
 }
 .bubble {
-  max-width: 72%;
+  max-width: 86%;
   padding: 10px 12px;
   border-radius: 12px;
   box-shadow: 0 6px 18px rgba(2, 6, 23, 0.6);
@@ -568,11 +568,94 @@ body.dark header, body.dark .header-icon-btn, body.dark header button {
   background: linear-gradient(180deg, #2b6ef6 0%, #1f4fe0 100%);
   color: #fff;
   border-top-right-radius: 6px;
-  display: flex;
+  display: block;
   justify-self: flex-end;
 }
 .bubble .timestamp {
   display: none;
+}
+
+/* Embeds and OG cards */
+.embed-wrap {
+  margin-top: 10px;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+.embed-wrap .yt-embed {
+  width: 480px;
+  max-width: 100%;
+  height: 270px;
+  display: block;
+  border: 0;
+  border-radius: 12px;
+}
+.og-card {
+  display: flex;
+  gap: 12px;
+  align-items: stretch;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  padding: 10px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+  position: relative;
+}
+.og-card .og-img {
+  width: 120px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.og-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.og-site {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.og-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.og-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.2;
+}
+
+/* Copy button overlay for embeds/OG cards */
+.embed-copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  z-index: 5;
+}
+.embed-copy-btn:hover { background: rgba(0,0,0,0.75) }
+
+/* Make bubble text a bit nicer */
+.bubble-text {
+  font-size: 15px;
+  color: inherit;
+  line-height: 1.45;
+  word-break: break-word;
 }
 
 /* Typing indicator dots */
@@ -925,6 +1008,133 @@ input[type="text"] {
   cursor: pointer;
   font-weight: 600;
 }
+
+/* Code block styles for in-chat rendering */
+.code-block-wrap {
+  position: relative;
+  margin: 8px 0;
+  border-radius: 10px;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+.code-block-wrap .code-meta {
+  background: rgba(0,0,0,0.04);
+  color: var(--text-muted);
+  padding: 6px 10px;
+  font-size: 12px;
+}
+.code-block-wrap .code-lang { display:none }
+.code-block-wrap pre { margin: 0; }
+.plain-code { background: var(--surface-2); padding: 12px; white-space: pre; overflow: auto; }
+.code-copy-btn { z-index: 12; }
+
+/* Ensure highlighted html from shiki fits */
+.code-block-wrap .shiki { display:block; }
+
+/* ChatGPT-like appearance: darker code area with subtle border and copy button */
+.code-block-wrap .shiki pre {
+  margin: 0 !important;
+  background: #0b1220 !important;
+  color: #d6deeb !important;
+}
+.code-block-wrap .shiki {
+  background: #0b1220;
+  color: #d6deeb;
+}
+.code-block-wrap .code-lang {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+/* Improved styling for in-chat code blocks */
+.code-block-wrap {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(2,6,23,0.08);
+  border: 1px solid rgba(0,0,0,0.06);
+  max-width: 680px;
+  margin: 6px 0;
+  display: block;
+  width: 100%;
+}
+.code-block-wrap .shiki {
+  display: block;
+  padding: 12px 14px 14px 14px;
+  border-radius: 12px;
+}
+.code-lang {
+  position: absolute;
+  top: 8px;
+  left: 10px;
+  background: rgba(255,255,255,0.06);
+  color: #cbd5e1;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  z-index: 20;
+}
+.code-copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  padding: 6px 8px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: none;
+  background: rgba(255,255,255,0.06);
+  color: #e6eef8;
+  cursor: pointer;
+  z-index: 30;
+  opacity: 0.95;
+}
+.code-copy-btn:hover { background: rgba(255,255,255,0.09); }
+.code-copy-btn:active { transform: translateY(1px); }
+
+/* Make code content scroll when long */
+.code-block-wrap pre { max-height: 320px; overflow: auto; display:block; width:100%; box-sizing:border-box; padding:12px 14px 12px 14px; padding-right:56px; }
+
+/* Ensure code blocks render clearly inside chat bubbles */
+.bubble { overflow: visible; }
+.bubble .code-block-wrap { display: block; box-sizing: border-box; width: 100%; margin: 8px 0; padding: 0; }
+.sent-wrapper .code-block-wrap, .received-wrapper .code-block-wrap { max-width: 100%; width: 100%; }
+
+/* Ensure code inside sent bubbles is left-aligned and fills available space */
+.bubble.sent .code-block-wrap { text-align: left; }
+.bubble .code-block-wrap pre { text-align: left; }
+
+/* Make sure code text is visible regardless of parent bubble styles */
+.code-block-wrap pre, .code-block-wrap code, .code-block-wrap .line { color: #e6eef8 !important; }
+.code-block-wrap pre, .code-block-wrap code { font-family: var(--font-mono); font-size: 15px; line-height: 1.6; white-space: pre; word-break: break-word; }
+
+/* inner wrapper so we can position pill/button without overlapping code */
+.code-block-wrap .code-inner {
+  position: relative;
+  padding: 12px 12px 12px 12px;
+}
+.code-block-wrap pre {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  background: #0b1220 !important;
+  color: #e6eef8 !important;
+  padding: 14px 64px 14px 14px !important; /* leave right space for copy button */
+  border-radius: 8px;
+  margin: 0;
+  overflow: auto;
+}
+.code-block-wrap .code-lang { position: absolute; top: 12px; left: 12px; z-index: 25; }
+.code-block-wrap .code-copy-btn { top: 12px; right: 12px; }
+.plain-code { color: var(--text-primary); background: var(--surface-2); padding: 12px; border-radius: 8px; }
+
+/* If shiki failed and produced small inline elements, force block layout */
+.code-block-wrap .shiki { display: block !important; }
+
+
+
 
 .line {
   height: 2px;

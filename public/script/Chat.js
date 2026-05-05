@@ -8,6 +8,8 @@ import { getFirestore, collection, addDoc, getDoc, doc }
 
 import { firebaseConfig }     from "./secrets.js"
 import { sanitizeString } from './sanitizer.js'
+import { highlightCodeBlock, attachCopyButton } from './codeRenderer.js'
+import { detectCode } from './codeDetector.js'
 
 // ── Firebase ──────────────────────────────────────────────────────────────────
 const app  = initializeApp(firebaseConfig)
@@ -35,7 +37,7 @@ const typingPath   = `${basePath}/typing`
 // ── DOM ───────────────────────────────────────────────────────────────────────
 const el              = id => document.getElementById(id)
 const msgInput        = el("msg")
-const chat            = el("chat")
+let chat              = el("chat")
 const sendBtn         = el("send")
 const clearBtn        = el("clearbtn")
 const logoutBtn       = el("logout") || el("logout-chat") || el("logout-button")
@@ -116,11 +118,12 @@ function escapeHtml(str) {
     return d.innerHTML
 }
 
+// Use the shared detector module instead (imported above).
 function updateReplyUI() {
     if (!replyBar || !replyText) return
     if (!replyTo) { replyBar.style.display = "none"; replyText.textContent = ""; return }
     replyBar.style.display = "flex"
-    replyText.textContent  = `${replyTo.name}: ${replyTo.text || "[file]"}`
+    replyText.textContent  = `${isDM ? '' : (replyTo.name + ': ')}${replyTo.text || "[file]"}`
 }
 
 async function getPfp(senderUid) {
@@ -187,14 +190,147 @@ async function renderContent(bubble, data) {
         return
     }
 
-    // Text message
-    const text = data.text || ""
-    const textDiv = document.createElement("div")
-    textDiv.className   = "bubble-text"
-    textDiv.textContent = `${data.name || "anon"}: ${text}`
-    bubble.appendChild(textDiv)
+    // Text message (handle fenced code blocks robustly)
+        const text = data.text || ""
+        // Decode any HTML entities (so encoded backticks like &#96; are converted)
+        let decodedText = text
+        try {
+            const doc = new DOMParser().parseFromString(text, 'text/html')
+            decodedText = doc.documentElement.textContent || text
+        } catch (_) { decodedText = text }
 
-    const urls = extractUrls(text)
+        // Pre-extract URLs so we can hide the raw link when rendering an embed
+        const urls = extractUrls(text)
+        const firstUrl = urls && urls.length ? urls[0] : null
+
+        // Accept both multi-line and single-line fenced blocks: ```js\n...``` or ```js code ```
+        const CODE_FENCE_RE = /```\s*([a-zA-Z0-9+#-]*)\s*\r?\n?([\s\S]*?)```/g
+
+    // If there's no code fence, try auto-detect code; otherwise render as text
+    if (!CODE_FENCE_RE.test(decodedText)) {
+        // Auto-detect code-like messages so users don't need to type backticks.
+        // This detector attempts to infer language (highlight.js names) conservatively.
+        // Use shared detector from `codeDetector.js` (imported above)
+
+        // Run auto-detection on the original raw `text` so we can detect HTML tags
+        // before they are stripped by the HTML decoder above.
+        const auto = detectCode(text)
+        if (auto.isCode) {
+            const wrap = document.createElement('div')
+            wrap.className = 'code-block-wrap'
+            const inner = document.createElement('div')
+            inner.className = 'code-inner'
+            const pre = document.createElement('pre')
+            const codeEl = document.createElement('code')
+            codeEl.className = auto.lang || ''
+            codeEl.textContent = auto.code
+            pre.appendChild(codeEl)
+            inner.appendChild(pre)
+            wrap.appendChild(inner)
+            bubble.appendChild(wrap)
+            attachCopyButton(wrap, auto.lang || '')
+            if (window.hljs && typeof window.hljs.highlightElement === 'function') {
+                try { window.hljs.highlightElement(codeEl) } catch (e) {}
+            }
+            } else {
+            const textDiv = document.createElement("div")
+            textDiv.className   = "bubble-text"
+            // If we'll render an embed for the first URL, remove it from the displayed text
+            let display = decodedText
+            if (firstUrl) display = display.replace(firstUrl, '').trim()
+            const prefix = isDM ? '' : `${data.name || "anon"}: `
+            // If display is empty after removing url, don't render an empty text node
+            if (display) textDiv.textContent = `${prefix}${display}`
+            else if (!isDM) textDiv.textContent = `${data.name || "anon"}: `
+            bubble.appendChild(textDiv)
+        }
+    } else {
+        // Reset regex state
+        CODE_FENCE_RE.lastIndex = 0
+        let lastIndex = 0
+        const container = document.createElement('div')
+        container.className = 'multi-segment'
+
+        while (true) {
+            const m = CODE_FENCE_RE.exec(decodedText)
+            if (!m) break
+            const idx = m.index
+            // Text before code fence — strip leftover backticks
+            if (idx > lastIndex) {
+                let plain = decodedText.slice(lastIndex, idx)
+                plain = plain.replace(/`{1,3}/g, '')
+                // remove firstUrl from plain segment when embedding
+                if (firstUrl) plain = plain.replace(firstUrl, '').trim()
+                const td = document.createElement('div')
+                td.className = 'bubble-text'
+                const prefix = isDM ? '' : `${data.name || 'anon'}: `
+                if (plain) td.textContent = `${prefix}${plain}`
+                else if (!isDM) td.textContent = `${data.name || 'anon'}: `
+                container.appendChild(td)
+            }
+
+            const lang = m[1] || ''
+            let code = m[2] || ''
+            // Trim surrounding whitespace/newlines for inline fences
+            code = code.replace(/^\s+|\s+$/g, '')
+            const result = await highlightCodeBlock(code, lang)
+            const wrap = document.createElement('div')
+            wrap.className = 'code-block-wrap'
+
+            if (result && result.kind === 'hljs') {
+                // create a pre/code element and set textContent to avoid unescaped-HTML
+                const inner = document.createElement('div')
+                inner.className = 'code-inner'
+                const pre = document.createElement('pre')
+                const codeEl = document.createElement('code')
+                codeEl.className = `hljs ${result.lang || ''}`
+                codeEl.textContent = result.code
+                pre.appendChild(codeEl)
+                inner.appendChild(pre)
+                wrap.appendChild(inner)
+                container.appendChild(wrap)
+                attachCopyButton(wrap, result.lang)
+                // initialize highlight.js on the element
+                if (window.hljs && typeof window.hljs.highlightElement === 'function') {
+                    try { window.hljs.highlightElement(codeEl) } catch (e) {}
+                }
+            } else if (result && result.kind === 'plain') {
+                const inner = document.createElement('div')
+                inner.className = 'code-inner'
+                const pre = document.createElement('pre')
+                const codeEl = document.createElement('code')
+                codeEl.textContent = result.code
+                pre.appendChild(codeEl)
+                pre.className = 'plain-code'
+                inner.appendChild(pre)
+                wrap.appendChild(inner)
+                container.appendChild(wrap)
+                attachCopyButton(wrap, '')
+            } else {
+                // last-resort: treat as HTML string (shouldn't happen now)
+                wrap.innerHTML = result || ''
+                container.appendChild(wrap)
+                attachCopyButton(wrap, lang)
+            }
+
+            lastIndex = CODE_FENCE_RE.lastIndex
+        }
+
+        // Trailing text after last code block
+        if (lastIndex < decodedText.length) {
+            let tail = decodedText.slice(lastIndex)
+            if (firstUrl) tail = tail.replace(firstUrl, '').trim()
+            const td = document.createElement('div')
+            td.className = 'bubble-text'
+            const prefix = isDM ? '' : `${data.name || 'anon'}: `
+            if (tail) td.textContent = `${prefix}${tail}`
+            else if (!isDM) td.textContent = `${data.name || 'anon'}: `
+            container.appendChild(td)
+        }
+
+        bubble.appendChild(container)
+    }
+
     if (!urls.length) return
     const url = urls[0]
 
@@ -204,6 +340,15 @@ async function renderContent(bubble, data) {
         const w = document.createElement("div")
         w.className = "embed-wrap"
         w.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen class="yt-embed"></iframe>`
+        // add copy button overlay for embed
+        const copyBtn = document.createElement('button')
+        copyBtn.className = 'embed-copy-btn'
+        copyBtn.textContent = 'Copy'
+        copyBtn.addEventListener('click', (ev) => {
+            ev.stopPropagation(); ev.preventDefault()
+            navigator.clipboard.writeText(url).then(() => showToast('Link copied!')).catch(() => showToast('Copy failed.', true))
+        })
+        w.appendChild(copyBtn)
         bubble.appendChild(w)
         return
     }
@@ -237,6 +382,15 @@ async function renderContent(bubble, data) {
                 <div class="og-title">${escapeHtml(og.title)}</div>
                 ${og.description ? `<div class="og-desc">${escapeHtml(og.description.slice(0, 120))}…</div>` : ""}
             </div>`
+        // Add copy button to OG card (avoid following link when copying)
+        const obtn = document.createElement('button')
+        obtn.className = 'embed-copy-btn'
+        obtn.textContent = 'Copy'
+        obtn.addEventListener('click', (ev) => {
+            ev.stopPropagation(); ev.preventDefault()
+            navigator.clipboard.writeText(url).then(() => showToast('Link copied!')).catch(() => showToast('Copy failed.', true))
+        })
+        card.appendChild(obtn)
         bubble.appendChild(card)
     }
 }
@@ -252,8 +406,8 @@ async function createBubble(data) {
     const avatar     = document.createElement("img")
     avatar.className = "bubble-avatar"
     avatar.alt       = data.name || "anon"
-    avatar.src       = data.pfp || (await getPfp(data.uid)) || "/resources/anonymous.png"
-    avatar.addEventListener('error', () => { if (avatar.src !== '/resources/anonymous.png') avatar.src = '/resources/anonymous.png' })
+    avatar.src       = data.pfp || (await getPfp(data.uid)) || "../resources/anonymous.png"
+    avatar.addEventListener('error', () => { if (avatar.src !== '../resources/anonymous.png') avatar.src = '../resources/anonymous.png' })
 
     const bubble     = document.createElement("div")
     bubble.className = `bubble ${isSent ? "sent" : "received"}`
@@ -262,11 +416,20 @@ async function createBubble(data) {
     if (data.replyTo) {
         const rd       = document.createElement("div")
         rd.className   = "reply-preview"
-        rd.textContent = `↳ ${data.replyTo.name || "anon"}: ${data.replyTo.text || "[file]"}`
+        rd.textContent = `↳ ${isDM ? '' : (data.replyTo.name || "anon") + ': '}${data.replyTo.text || "[file]"}`
         bubble.appendChild(rd)
     }
 
-    await renderContent(bubble, data)
+    try {
+        await renderContent(bubble, data)
+    } catch (err) {
+        console.error('renderContent error', err)
+        const errDiv = document.createElement('div')
+        errDiv.className = 'bubble-text'
+        const prefix = isDM ? '' : `${data.name || 'anon'}: `
+        errDiv.textContent = `${prefix}[render error]`
+        bubble.appendChild(errDiv)
+    }
 
     const ts       = document.createElement("span")
     ts.className   = "timestamp"
@@ -385,7 +548,16 @@ async function sendFile(file) {
 }
 
 // ── Wire buttons ──────────────────────────────────────────────────────────────
-msgInput?.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage() })
+msgInput?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+        if (e.shiftKey) {
+            // allow newline insertion when Shift+Enter
+            return
+        }
+        e.preventDefault()
+        sendMessage()
+    }
+})
 sendBtn?.addEventListener("click", sendMessage)
 clearBtn?.addEventListener("click", () => remove(ref(db, messagesPath)).catch(console.error))
 logoutBtn?.addEventListener("click", async () => {
@@ -408,13 +580,20 @@ document.addEventListener('keydown', e => {
 const renderedIds = new Set()
 
 onChildAdded(ref(db, messagesPath), async snap => {
-    if (!chat) return
+    // Re-resolve chat container in case DOM changed
+    if (!chat) {
+        chat = document.getElementById('chat') || document.querySelector('.chat') || document.querySelector('#chat')
+        console.log('re-resolved chat element:', chat)
+    }
+    if (!chat) { console.warn('chat container not found, skipping message render'); return }
     const m = snap.val() || {}
     m.id    = m.id || snap.key
     if (renderedIds.has(m.id)) return
     renderedIds.add(m.id)
 
-    const wrapper = await createBubble({
+    let wrapper
+    try {
+        wrapper = await createBubble({
         type:     m.type     || "text",
         text:     m.text     || "",
         name:     m.name     || "anon",
@@ -426,9 +605,20 @@ onChildAdded(ref(db, messagesPath), async snap => {
         fileUrl:  m.fileUrl  || null,
         fileName: m.fileName || null,
         fileType: m.fileType || null
-    })
+        })
+    } catch (err) {
+        console.error('createBubble error', err)
+        // Fallback: create minimal wrapper so chat remains usable
+        wrapper = document.createElement('div')
+        wrapper.className = 'bubble-wrapper'
+        const fallback = document.createElement('div')
+        fallback.className = 'bubble-text'
+        const prefix = isDM ? '' : `${m.name || 'anon'}: `
+        fallback.textContent = `${prefix}[message failed to render]`
+        wrapper.appendChild(fallback)
+    }
 
-    chat.appendChild(wrapper)
+    if (wrapper) chat.appendChild(wrapper)
     chat.scrollTop = chat.scrollHeight
 }, err => console.error("messages onChildAdded error", err))
 

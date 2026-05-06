@@ -19,7 +19,7 @@ const auth = getAuth(app)
 const fs = getFirestore(app)
 
 function getContinueUrl() {
-    const defaultLocal = 'http://localhost:5000'
+    const defaultLocal = 'http://localhost:5500'
     const origin = (window.location && (window.location.protocol === 'file:' || !window.location.origin || window.location.origin === 'null'))
         ? defaultLocal
         : window.location.origin

@@ -10,12 +10,14 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
 import { updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { firebaseConfig } from "./secrets.js";
+import { mountGitHubWidgets } from "./profileWidgets.js";
 
 window.addEventListener("DOMContentLoaded", () => {
     const app  = initializeApp(firebaseConfig);
     const fs   = getFirestore(app);
     const rtdb = getDatabase(app);
     const auth = getAuth(app);
+
 
     // ── DOM refs ──────────────────────────────────────────────────────────────
     const searchbar        = document.getElementById("user-search");
@@ -64,6 +66,13 @@ window.addEventListener("DOMContentLoaded", () => {
     onAuthStateChanged(auth, user => {
         if (!user) { go('/'); return; }
         currentUser = user;
+                // update simple home profile display
+                try {
+                    const hname = document.getElementById('home-display-name');
+                    const hp = document.getElementById('home-pfp');
+                    if (hname) hname.textContent = user.displayName || (user.email||'').split('@')[0] || 'You';
+                    if (hp && user.photoURL) hp.src = user.photoURL;
+                } catch (e) {}
         loadDMs();
         loadGroupChats();
         loadFriendRequests();
@@ -126,6 +135,23 @@ window.addEventListener("DOMContentLoaded", () => {
         const query = searchbar.value.trim().toLowerCase();
         if (!query) return;
 
+        // If user typed 'me', show the signed-in user's profile immediately
+        if (query === 'me') {
+            if (!currentUser) {
+                resultsContainer.innerHTML = `<div class="empty-state"><div class="empty-icon">🔒</div><p>Please sign in to view your profile.</p></div>`;
+                return;
+            }
+            try {
+                const userDoc = await getDoc(doc(fs, "users", currentUser.uid));
+                if (userDoc && userDoc.exists()) { const u = userDoc.data(); u.uid = userDoc.id; showUserProfile(u); }
+                else showUserProfile({ uid: currentUser.uid, username: currentUser.displayName || (currentUser.email||'').split('@')[0], email: currentUser.email, pfp: currentUser.photoURL });
+            } catch (err) {
+                console.error(err);
+                resultsContainer.innerHTML = "<p style='padding:20px;color:var(--danger)'>Error fetching profile.</p>";
+            }
+            return;
+        }
+
         resultsContainer.innerHTML = `<div class="empty-state"><div class="empty-icon" style="font-size:32px;animation:spin 1s linear infinite">⟳</div><p>Searching…</p></div>`;
 
         try {
@@ -158,6 +184,72 @@ window.addEventListener("DOMContentLoaded", () => {
         return (name[0] || "?").toUpperCase();
     };
 
+    // Show a single user's profile in the results pane and mount their widgets
+    function showUserProfile(user) {
+        const pfpUrl = user.pfp || user.photoURL || null;
+        const avatarHtml = pfpUrl
+            ? `<img id="pf-search-img" src="${escapeHtml(pfpUrl)}" alt="${escapeHtml(user.username)}" class="pf-avatar-img" />`
+            : `<div class="pf-avatar-lg">${getInitials(user.username || '')}</div>`;
+
+        resultsContainer.innerHTML = `
+            <div id="pf-search-container">
+                <div id="pf-avatar-wrapper">${avatarHtml}</div>
+                <h2 id="pf-search-h2">${escapeHtml(user.username || user.uid)}</h2>
+                <div class="pf-detail-row">
+                    <span class="pf-detail-label">Email</span>
+                    <span>${escapeHtml(user.email || '')}</span>
+                </div>
+                <div class="pf-detail-row">
+                    <span class="pf-detail-label">Bio</span>
+                    <span>${escapeHtml(user.bio || "No bio yet")}</span>
+                </div>
+                <div class="pf-actions">
+                    <button class="pf-btn primary" id="add-friend-pf">Add Friend</button>
+                    <button class="pf-btn secondary" id="message-friend-pf">Message</button>
+                </div>
+                <div id="pf-search-widgets" style="margin-top:12px"></div>
+                <button id="pf-search-back">← Back to results</button>
+            </div>`;
+
+        // Image fallback
+        if (pfpUrl) {
+            const img = document.getElementById('pf-search-img');
+            if (img) img.addEventListener('error', () => {
+                const wrapper = document.getElementById('pf-avatar-wrapper');
+                if (wrapper) wrapper.innerHTML = `<div class="pf-avatar-lg">${getInitials(user.username || '')}</div>`;
+            });
+        }
+
+        const addBtn = document.getElementById("add-friend-pf");
+        if (addBtn) addBtn.addEventListener("click", () => sendFriendRequest(user.uid));
+
+        const msgBtn = document.getElementById("message-friend-pf");
+        if (msgBtn) msgBtn.addEventListener("click", async () => {
+            if (!currentUser) { alert("Please sign in to message users."); return; }
+            const dmId = [currentUser.uid, user.uid].sort().join("_");
+            const dmRef = ref(rtdb, `dms/${dmId}`);
+            try {
+                const snap = await get(dmRef);
+                if (!snap.exists()) {
+                    const targetName = user.username || user.uid;
+                    const myName = currentUser.displayName || (currentUser.email || "").split("@")[0];
+                    await set(dmRef, {
+                        members: { [currentUser.uid]: myName, [user.uid]: targetName },
+                        lastMessage: "",
+                        lastAt: Date.now(),
+                        createdAt: Date.now()
+                    });
+                }
+            } catch (err) { console.error("Create DM error:", err); }
+            go(`/chat/?dm=${dmId}`);
+        });
+
+        document.getElementById("pf-search-back").addEventListener("click", handleSearch);
+
+        // Mount widgets for this user (will read users/{uid}.widgets to find githubOwner)
+        try { mountGitHubWidgets('pf-search-widgets', user.uid); } catch (e) { console.warn('Mount profile widgets failed', e); }
+    }
+
     const displayResults = (results) => {
         resultsContainer.innerHTML = "";
         if (results.length === 0) {
@@ -177,64 +269,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 </div>`;
             resultsContainer.appendChild(userDiv);
 
-                userDiv.addEventListener("click", () => {
-                    const pfpUrl = user.pfp || user.photoURL || null;
-                    const avatarHtml = pfpUrl
-                        ? `<img id="pf-search-img" src="${escapeHtml(pfpUrl)}" alt="${escapeHtml(user.username)}" class="pf-avatar-img" />`
-                        : `<div class="pf-avatar-lg">${getInitials(user.username)}</div>`;
-
-                    resultsContainer.innerHTML = `
-                    <div id="pf-search-container">
-                        <div id="pf-avatar-wrapper">${avatarHtml}</div>
-                        <h2 id="pf-search-h2">${escapeHtml(user.username)}</h2>
-                        <div class="pf-detail-row">
-                            <span class="pf-detail-label">Email</span>
-                            <span>${escapeHtml(user.email)}</span>
-                        </div>
-                        <div class="pf-detail-row">
-                            <span class="pf-detail-label">Bio</span>
-                            <span>${escapeHtml(user.bio || "No bio yet")}</span>
-                        </div>
-                        <div class="pf-actions">
-                            <button class="pf-btn primary" id="add-friend-pf">Add Friend</button>
-                            <button class="pf-btn secondary" id="message-friend-pf">Message</button>
-                        </div>
-                        <button id="pf-search-back">← Back to results</button>
-                    </div>`;
-
-                    // If image fails to load, fall back to initials
-                    if (pfpUrl) {
-                        const img = document.getElementById('pf-search-img');
-                        if (img) {
-                            img.addEventListener('error', () => {
-                                const wrapper = document.getElementById('pf-avatar-wrapper');
-                                if (wrapper) wrapper.innerHTML = `<div class="pf-avatar-lg">${getInitials(user.username)}</div>`;
-                            });
-                        }
-                    }
-
-                    document.getElementById("add-friend-pf").addEventListener("click", () => sendFriendRequest(user.uid));
-                    document.getElementById("message-friend-pf").addEventListener("click", async () => {
-                        if (!currentUser) { alert("Please sign in to message users."); return; }
-                        const dmId = [currentUser.uid, user.uid].sort().join("_");
-                        const dmRef = ref(rtdb, `dms/${dmId}`);
-                        try {
-                            const snap = await get(dmRef);
-                            if (!snap.exists()) {
-                                const targetName = user.username || user.uid;
-                                const myName = currentUser.displayName || (currentUser.email || "").split("@")[0];
-                                await set(dmRef, {
-                                    members: { [currentUser.uid]: myName, [user.uid]: targetName },
-                                    lastMessage: "",
-                                    lastAt: Date.now(),
-                                    createdAt: Date.now()
-                                });
-                            }
-                        } catch (err) { console.error("Create DM error:", err); }
-                        go(`/chat/?dm=${dmId}`);
-                    });
-                    document.getElementById("pf-search-back").addEventListener("click", handleSearch);
-                });
+                userDiv.addEventListener("click", () => showUserProfile(user));
         });
     };
 

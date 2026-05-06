@@ -20,6 +20,7 @@ import {
   doc,
   getDoc,
   updateDoc,
+  setDoc,
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { arrayUnion } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import {
@@ -78,8 +79,46 @@ document.querySelectorAll(".settings-tab").forEach((tab) => {
     tab.classList.add("active-tab");
     const panel = document.getElementById(tab.dataset.target);
     if (panel) panel.classList.add("active-panel");
+
+    // Update main header title/description to match active panel
+    const labelEl = tab.querySelector('.tab-label');
+    const title = (labelEl && labelEl.textContent.trim()) || tab.textContent.trim();
+    const descMap = {
+      'panel-profile': 'Manage your public identity and account settings.',
+      'panel-account': 'Account-related settings like email and password.',
+      'panel-linked-accounts': 'Connect or disconnect external providers (Google, GitHub).',
+      'panel-appearance': 'Customize theme, accent color, and chat appearance.',
+      'panel-widgets': 'Choose which widgets appear on your profile and Home page.',
+      'panel-privacy': 'Control discoverability and data-sharing settings for your account.'
+    };
+    const desc = descMap[tab.dataset.target] || '';
+    const mainTitle = document.querySelector('.main-header h1');
+    const mainDesc = document.querySelector('.main-header p');
+    if (mainTitle) mainTitle.textContent = title;
+    if (mainDesc) mainDesc.textContent = desc;
   });
 });
+
+// Initialize header based on currently active tab (on page load)
+(() => {
+  const active = document.querySelector('.settings-tab.active-tab') || document.querySelector('.settings-tab');
+  if (!active) return;
+  const labelEl = active.querySelector('.tab-label');
+  const title = (labelEl && labelEl.textContent.trim()) || active.textContent.trim();
+  const descMap = {
+    'panel-profile': 'Manage your public identity and account settings.',
+    'panel-account': 'Account-related settings like email and password.',
+    'panel-linked-accounts': 'Connect or disconnect external providers (Google, GitHub).',
+    'panel-appearance': 'Customize theme, accent color, and chat appearance.',
+    'panel-widgets': 'Choose which widgets appear on your profile and Home page.',
+    'panel-privacy': 'Control discoverability and data-sharing settings for your account.'
+  };
+  const desc = descMap[active.dataset.target] || '';
+  const mainTitle = document.querySelector('.main-header h1');
+  const mainDesc = document.querySelector('.main-header p');
+  if (mainTitle) mainTitle.textContent = title;
+  if (mainDesc) mainDesc.textContent = desc;
+})();
 
 // ── Auth state ────────────────────────────────────────────────────────────────
 let currentUser = null;
@@ -213,6 +252,27 @@ async function loadProfile(user) {
       readReceiptsEl.checked = !!privacy.readReceipts;
       localStorage.setItem("venture-read-receipts", readReceiptsEl.checked);
     }
+    // Initialize widget settings UI
+    try {
+      const widgets = data.widgets || {};
+      const showStars = widgets.showStars === undefined ? true : !!widgets.showStars;
+      const showLangs = widgets.showLanguages === undefined ? true : !!widgets.showLanguages;
+      const showRecent = widgets.showRecent === undefined ? true : !!widgets.showRecent;
+      const useLinked = widgets.useLinkedGithub === undefined ? true : !!widgets.useLinkedGithub;
+      const owner = widgets.githubOwner || "";
+
+      const elShowStars = $("show-stars-toggle");
+      const elShowLangs = $("show-langs-toggle");
+      const elShowRecent = $("show-recent-toggle");
+      const elUseLinked = $("use-linked-github-toggle");
+      const elOwner = $("github-owner-input");
+
+      if (elShowStars) elShowStars.checked = showStars;
+      if (elShowLangs) elShowLangs.checked = showLangs;
+      if (elShowRecent) elShowRecent.checked = showRecent;
+      if (elUseLinked) elUseLinked.checked = useLinked;
+      if (elOwner) elOwner.value = owner;
+    } catch (e) { console.warn('Failed to initialize widget controls', e); }
   } catch (e) {
     console.warn("Unable to initialize privacy toggles", e);
   }
@@ -628,15 +688,48 @@ if (linkGithubBtn) {
     try {
       const res = await linkWithPopup(currentUser, githubProvider);
       currentUser = res.user || currentUser;
+
+      // Try to obtain the OAuth access token and fetch the GitHub login
+      let githubLogin = null;
       try {
-        await updateDoc(doc(fs, "users", currentUser.uid), {
+        const cred = GithubAuthProvider.credentialFromResult(res);
+        const token = cred?.accessToken || res?.credential?.accessToken;
+        if (token) {
+          const r = await fetch("https://api.github.com/user", {
+            headers: { Authorization: `token ${token}`, Accept: "application/vnd.github.v3+json" },
+          });
+          if (r.ok) {
+            const profile = await r.json();
+            githubLogin = profile.login || null;
+          }
+        }
+      } catch (err) {
+        console.warn("Could not fetch GitHub profile", err);
+      }
+
+      try {
+        const updates = {
           providers: arrayUnion("github"),
           pfp: res.user.photoURL || currentUser.photoURL || null,
           email: res.user.email || currentUser.email || null,
-        });
+        };
+        if (githubLogin) {
+          updates.githubOwner = githubLogin;
+          updates['widgets.githubOwner'] = githubLogin;
+          // prefer linked account for widgets by default
+          updates['widgets.useLinkedGithub'] = true;
+        }
+
+        try {
+          await updateDoc(doc(fs, "users", currentUser.uid), updates);
+        } catch (err) {
+          // if the user doc doesn't exist yet, create/merge
+          await setDoc(doc(fs, "users", currentUser.uid), updates, { merge: true });
+        }
       } catch (ee) {
         console.warn("Failed to update user providers in Firestore", ee);
       }
+
       toast("GitHub account linked!");
       refreshLinkedButtons();
     } catch (e) {
@@ -725,3 +818,79 @@ if (requestDataBtn)
   requestDataBtn.addEventListener("click", () =>
     toast("Data export requested — we will email you when ready."),
   );
+
+// ── Widgets: save / reset ───────────────────────────────────────────────────
+const saveWidgetsBtn = $("save-widgets-btn");
+const resetWidgetsBtn = $("reset-widgets-btn");
+
+if (saveWidgetsBtn) {
+  saveWidgetsBtn.addEventListener("click", async () => {
+    if (!currentUser && !DEV_PREVIEW) return toast("Please sign in.", true);
+    const widgets = {
+      showStars: !!$("show-stars-toggle")?.checked,
+      showLanguages: !!$("show-langs-toggle")?.checked,
+      showRecent: !!$("show-recent-toggle")?.checked,
+      useLinkedGithub: !!$("use-linked-github-toggle")?.checked,
+      githubOwner: ($("github-owner-input")?.value || "").trim(),
+    };
+
+    try {
+      if (DEV_PREVIEW) {
+        const saved = JSON.parse(localStorage.getItem("dev-profile") || "{}");
+        saved.widgets = widgets;
+        localStorage.setItem("dev-profile", JSON.stringify(saved));
+        toast("Widget settings saved (local preview)");
+        return;
+      }
+      try {
+        await updateDoc(doc(fs, "users", currentUser.uid), { widgets });
+      } catch (err) {
+        // If the document doesn't exist, create it with merge
+        try {
+          await setDoc(doc(fs, "users", currentUser.uid), { widgets }, { merge: true });
+        } catch (err2) {
+          throw err2;
+        }
+      }
+      toast("Widget settings saved");
+    } catch (e) {
+      console.error("Save widgets failed", e);
+      toast("Failed to save widgets", true);
+    }
+  });
+}
+
+if (resetWidgetsBtn) {
+  resetWidgetsBtn.addEventListener("click", async () => {
+    if (!currentUser && !DEV_PREVIEW) return toast("Please sign in.", true);
+    // reset UI to defaults
+    if ($("show-stars-toggle")) $("show-stars-toggle").checked = true;
+    if ($("show-langs-toggle")) $("show-langs-toggle").checked = true;
+    if ($("show-recent-toggle")) $("show-recent-toggle").checked = true;
+    if ($("use-linked-github-toggle")) $("use-linked-github-toggle").checked = true;
+    if ($("github-owner-input")) $("github-owner-input").value = "";
+
+    try {
+      if (DEV_PREVIEW) {
+        const saved = JSON.parse(localStorage.getItem("dev-profile") || "{}");
+        saved.widgets = { showStars: true, showLanguages: true, showRecent: true, useLinkedGithub: true, githubOwner: "" };
+        localStorage.setItem("dev-profile", JSON.stringify(saved));
+        toast("Widget settings reset (local preview)");
+        return;
+      }
+      try {
+        await updateDoc(doc(fs, "users", currentUser.uid), { widgets: { showStars: true, showLanguages: true, showRecent: true, useLinkedGithub: true, githubOwner: "" } });
+      } catch (err) {
+        try {
+          await setDoc(doc(fs, "users", currentUser.uid), { widgets: { showStars: true, showLanguages: true, showRecent: true, useLinkedGithub: true, githubOwner: "" } }, { merge: true });
+        } catch (err2) {
+          throw err2;
+        }
+      }
+      toast("Widget settings reset");
+    } catch (e) {
+      console.error("Reset widgets failed", e);
+      toast("Failed to reset widgets", true);
+    }
+  });
+}

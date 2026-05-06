@@ -68,6 +68,10 @@
             <span class="tab-icon">🎨</span>
             <span class="tab-label">Appearance</span>
           </button>
+          <button class="settings-tab" id="widgets-tab" data-target="panel-widgets">
+            <span class="tab-icon">📦</span>
+            <span class="tab-label">Widgets</span>
+          </button>
           <button class="settings-tab" id="privacy-tab" data-target="panel-privacy">
             <span class="tab-icon">🛡️</span>
             <span class="tab-label">Privacy</span>
@@ -345,6 +349,81 @@
                   <div class="bubble-option" data-style="pill" id="style-pill">Pill</div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- WIDGETS PANEL -->
+        <section id="panel-widgets" class="tab-panel">
+          <div class="appearance-section settings-card">
+            <h3>Profile Widgets</h3>
+            <p class="muted">Choose which widgets appear on your profile and Home page.</p>
+
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">Show Total Stars</div>
+                <div class="setting-desc">Display the total repository stars widget.</div>
+              </div>
+              <div class="setting-control">
+                <label class="toggle-switch">
+                  <input type="checkbox" id="show-stars-toggle" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">Show Language Mix</div>
+                <div class="setting-desc">Display a breakdown of primary languages across your repos.</div>
+              </div>
+              <div class="setting-control">
+                <label class="toggle-switch">
+                  <input type="checkbox" id="show-langs-toggle" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">Show Recent Activity</div>
+                <div class="setting-desc">List recently pushed repositories.</div>
+              </div>
+              <div class="setting-control">
+                <label class="toggle-switch">
+                  <input type="checkbox" id="show-recent-toggle" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">Use Linked GitHub Account</div>
+                <div class="setting-desc">If connected, prefer your linked GitHub account for widget data.</div>
+              </div>
+              <div class="setting-control">
+                <label class="toggle-switch">
+                  <input type="checkbox" id="use-linked-github-toggle" />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="setting-item">
+              <div>
+                <div class="setting-label">Fallback GitHub Owner</div>
+                <div class="setting-desc">If not using a linked account, use this owner to source repo data (e.g., `octocat`).</div>
+              </div>
+              <div class="setting-control">
+                <input id="github-owner-input" type="text" placeholder="github username or org" />
+              </div>
+            </div>
+
+            <div style="padding-top:10px;display:flex;gap:8px;">
+              <button id="save-widgets-btn" class="btn btn-accent">Save Widgets</button>
+              <button id="reset-widgets-btn" class="btn btn-gray">Reset</button>
             </div>
           </div>
         </section>

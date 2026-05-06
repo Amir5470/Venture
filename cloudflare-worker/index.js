@@ -49,6 +49,62 @@ function looksLikeIp(s) {
   return true;
 }
 
+// -------------------- GitHub & Firebase helpers --------------------
+async function verifyGithubSignature(request, secret) {
+  if (!secret) return false;
+  const sigHeader = request.headers.get('x-hub-signature-256') || '';
+  if (!sigHeader) return false;
+  const payload = await request.clone().arrayBuffer();
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const signature = await crypto.subtle.sign('HMAC', key, payload);
+  const hex = Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, '0')).join('');
+  const computed = 'sha256=' + hex;
+  return timingSafeEqual(computed, sigHeader);
+}
+
+function timingSafeEqual(a, b) {
+  if (!a || !b) return false;
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return result === 0;
+}
+
+async function writeToFirebase(env, path, obj) {
+  if (!env.FIREBASE_DATABASE_URL) throw new Error('missing FIREBASE_DATABASE_URL');
+  const base = env.FIREBASE_DATABASE_URL.replace(/\/$/, '');
+  let url = `${base}${path}.json`;
+  const headers = { 'Content-Type': 'application/json' };
+  if (env.FIREBASE_ACCESS_TOKEN) {
+    headers['Authorization'] = `Bearer ${env.FIREBASE_ACCESS_TOKEN}`;
+  } else if (env.FIREBASE_DATABASE_SECRET) {
+    url += `?auth=${encodeURIComponent(env.FIREBASE_DATABASE_SECRET)}`;
+  } else {
+    throw new Error('no firebase credentials configured (FIREBASE_ACCESS_TOKEN or FIREBASE_DATABASE_SECRET)');
+  }
+  const res = await fetch(url, { method: 'PATCH', headers, body: JSON.stringify(obj) });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`firebase write failed ${res.status} ${text}`);
+  }
+  return res;
+}
+
+async function fetchGitHubGraphQL(owner, name, token) {
+  if (!token) throw new Error('missing github token for graphQL');
+  const query = `\n    query ($owner: String!, $name: String!) {\n      repository(owner: $owner, name: $name) {\n        name\n        url\n        stargazerCount\n        pushedAt\n        primaryLanguage { name }\n      }\n    }\n  `;
+  const resp = await fetch('https://api.github.com/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `bearer ${token}` },
+    body: JSON.stringify({ query, variables: { owner, name } })
+  });
+  if (!resp.ok) throw new Error('GitHub GraphQL fetch failed: ' + resp.status);
+  const json = await resp.json();
+  return json.data;
+}
+
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -61,6 +117,75 @@ export default {
     if (url.pathname === '/health' && request.method === 'GET') {
       return jsonResponse({ ok: true });
     }
+
+    // --- GitHub OAuth + Webhook endpoints ---------------------------------
+    // OAuth start: redirect user to GitHub authorization URL
+    if (url.pathname === '/github/oauth/start' && request.method === 'GET') {
+      const clientId = env.GITHUB_CLIENT_ID;
+      if (!clientId) return jsonResponse({ success: false, error: 'missing_github_client_id' }, 500);
+      const state = url.searchParams.get('state') || Math.random().toString(36).slice(2);
+      const redirectUri = (env.WORKER_BASE_URL ? env.WORKER_BASE_URL.replace(/\/$/, '') : url.origin) + '/github/oauth/callback';
+      const scopes = env.GITHUB_OAUTH_SCOPES || 'repo';
+      const authUrl = `https://github.com/login/oauth/authorize?client_id=${encodeURIComponent(clientId)}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}&state=${encodeURIComponent(state)}`;
+      return Response.redirect(authUrl, 302);
+    }
+
+    // OAuth callback: exchange code for access token and postMessage to opener
+    if (url.pathname === '/github/oauth/callback' && request.method === 'GET') {
+      const code = url.searchParams.get('code');
+      if (!code) return new Response('Missing code', { status: 400, headers: CORS_HEADERS });
+      const redirectUri = (env.WORKER_BASE_URL ? env.WORKER_BASE_URL.replace(/\/$/, '') : url.origin) + '/github/oauth/callback';
+      try {
+        const tokRes = await fetch('https://github.com/login/oauth/access_token', {
+          method: 'POST',
+          headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ client_id: env.GITHUB_CLIENT_ID, client_secret: env.GITHUB_CLIENT_SECRET, code, redirect_uri: redirectUri })
+        });
+        const tokJson = await tokRes.json();
+        if (!tokJson.access_token) return new Response(JSON.stringify(tokJson), { status: 500, headers: { 'Content-Type': 'application/json', ...CORS_HEADERS }});
+        const safeData = JSON.stringify({ type: 'github_oauth_token', token: tokJson.access_token });
+        const html = `<!doctype html><html><body><script>try{window.opener.postMessage(${safeData}, '*')}catch(e){}try{window.close()}catch(e){}</script><p>Token received — you can close this window.</p></body></html>`;
+        return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html', ...CORS_HEADERS }});
+      } catch (e) {
+        return jsonResponse({ success: false, error: 'oauth_exchange_failed', details: String(e) }, 502);
+      }
+    }
+
+    // GitHub webhook receiver: verify signature, enrich via GraphQL, update Firebase
+    if (url.pathname === '/github/webhook' && request.method === 'POST') {
+      try {
+        const ok = await verifyGithubSignature(request, env.GITHUB_WEBHOOK_SECRET);
+        if (!ok) return new Response('invalid signature', { status: 401, headers: CORS_HEADERS });
+      } catch (e) {
+        return jsonResponse({ success: false, error: 'signature_error', details: String(e) }, 400);
+      }
+      let payload;
+      try { payload = await request.clone().json(); } catch (e) { return jsonResponse({ success:false, error:'invalid_json' }, 400); }
+      const repository = payload.repository || {};
+      const owner = repository.owner?.login || (repository.owner && repository.owner.name) || null;
+      const name = repository.name || repository.full_name || null;
+      const pushedAt = payload.head_commit?.timestamp || repository.pushed_at || new Date().toISOString();
+      let repoStats = { owner, name, last_updated: pushedAt };
+      if (env.GITHUB_GRAPHQL_TOKEN && owner && name) {
+        try {
+          const data = await fetchGitHubGraphQL(owner, name, env.GITHUB_GRAPHQL_TOKEN);
+          if (data && data.repository) {
+            repoStats = {
+              ...repoStats,
+              stargazerCount: data.repository.stargazerCount || 0,
+              primaryLanguage: data.repository.primaryLanguage ? { name: data.repository.primaryLanguage.name } : null,
+              url: data.repository.url || `https://github.com/${owner}/${name}`,
+              pushedAt: data.repository.pushedAt || pushedAt
+            };
+          }
+        } catch (e) { console.warn('graphQL fetch failed', e); }
+      }
+      try {
+        if (owner && name) await writeToFirebase(env, `/github/repos/${encodeURIComponent(owner)}/${encodeURIComponent(name)}`, repoStats);
+      } catch (e) { console.warn('firebase write failed', e); }
+      return new Response('ok', { status: 200, headers: CORS_HEADERS });
+    }
+
 
     const realIp = getIp(request);
     

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Venture | Profile Widgets</title>
+  <link rel="stylesheet" href="styles/site.css">
+  <style>
+    .widget-cards{display:flex;gap:12px;flex-wrap:wrap}
+    .widget-card{flex:1 1 220px;background:var(--surface-2);padding:16px;border-radius:10px;box-shadow:var(--card-shadow);}
+    .widget-title{font-size:13px;color:var(--text-secondary);margin-bottom:8px}
+    .widget-value{font-size:28px;font-weight:700}
+    .lang-pill{display:inline-block;background:var(--surface-1);padding:6px 8px;border-radius:999px;margin:4px 6px;font-size:13px}
+    .repo-row{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px dashed rgba(0,0,0,0.06)}
+    .repo-row a{color:var(--link);text-decoration:none}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header style="padding:18px 12px;border-bottom:1px solid var(--surface-3)">
+      <h1 style="margin:0">GitHub Profile Widgets</h1>
+      <p style="margin:6px 0 0;color:var(--text-secondary)">Live widgets powered by Firebase RTDB updates from a Cloudflare Worker webhook.</p>
+    </header>
+
+    <main style="padding:18px">
+      <div id="github-widgets">Loading widgets…</div>
+    </main>
+  </div>
+
+  <script type="module">
+    import { mountGitHubWidgets } from './script/profileWidgets.js'
+    // Option: pass ?uid=<firebase-uid> to preview another user's widgets
+    mountGitHubWidgets('github-widgets')
+  </script>
+</body>
+</html>

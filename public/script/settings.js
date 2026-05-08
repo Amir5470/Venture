@@ -271,11 +271,23 @@ async function loadProfile(user) {
       const elUseLinked = $("use-linked-github-toggle");
       const elOwner = $("github-owner-input");
 
+      const elTopLang = $("top-language-input");
+      const elShowSpotify = $("show-spotify-toggle");
+      const elSpotifyUser = $("spotify-username-input");
+      const elShowDiscord = $("show-discord-toggle");
+      const elDiscordStatus = $("discord-status-input");
+
       if (elShowStars) elShowStars.checked = showStars;
       if (elShowLangs) elShowLangs.checked = showLangs;
       if (elShowRecent) elShowRecent.checked = showRecent;
       if (elUseLinked) elUseLinked.checked = useLinked;
       if (elOwner) elOwner.value = owner;
+
+      if (elTopLang) elTopLang.value = widgets.topLanguage || data.topLanguage || '';
+      if (elShowSpotify) elShowSpotify.checked = widgets.showSpotify === undefined ? false : !!widgets.showSpotify;
+      if (elSpotifyUser) elSpotifyUser.value = widgets.spotifyUser || data.spotifyUser || '';
+      if (elShowDiscord) elShowDiscord.checked = widgets.showDiscord === undefined ? false : !!widgets.showDiscord;
+      if (elDiscordStatus) elDiscordStatus.value = widgets.discordStatus || data.discordStatus || '';
     } catch (e) { console.warn('Failed to initialize widget controls', e); }
   } catch (e) {
     console.warn("Unable to initialize privacy toggles", e);
@@ -908,6 +920,11 @@ if (saveWidgetsBtn) {
       showRecent: !!$("show-recent-toggle")?.checked,
       useLinkedGithub: !!$("use-linked-github-toggle")?.checked,
       githubOwner: ($("github-owner-input")?.value || "").trim(),
+      topLanguage: ($("top-language-input")?.value || "").trim(),
+      showSpotify: !!$("show-spotify-toggle")?.checked,
+      spotifyUser: ($("spotify-username-input")?.value || "").trim(),
+      showDiscord: !!$("show-discord-toggle")?.checked,
+      discordStatus: ($("discord-status-input")?.value || "").trim(),
     };
 
     try {
@@ -954,6 +971,11 @@ if (resetWidgetsBtn) {
     if ($("show-recent-toggle")) $("show-recent-toggle").checked = true;
     if ($("use-linked-github-toggle")) $("use-linked-github-toggle").checked = true;
     if ($("github-owner-input")) $("github-owner-input").value = "";
+    if ($("top-language-input")) $("top-language-input").value = "";
+    if ($("show-spotify-toggle")) $("show-spotify-toggle").checked = false;
+    if ($("spotify-username-input")) $("spotify-username-input").value = "";
+    if ($("show-discord-toggle")) $("show-discord-toggle").checked = false;
+    if ($("discord-status-input")) $("discord-status-input").value = "";
 
     try {
       if (DEV_PREVIEW) {
@@ -964,10 +986,10 @@ if (resetWidgetsBtn) {
         return;
       }
       try {
-        await updateDoc(doc(fs, "users", currentUser.uid), { widgets: { showStars: true, showLanguages: true, showRecent: true, useLinkedGithub: true, githubOwner: "" } });
+        await updateDoc(doc(fs, "users", currentUser.uid), { widgets: { showStars: true, showLanguages: true, showRecent: true, useLinkedGithub: true, githubOwner: "", topLanguage: "", showSpotify: false, spotifyUser: "", showDiscord: false, discordStatus: "" } });
       } catch (err) {
         try {
-          await setDoc(doc(fs, "users", currentUser.uid), { widgets: { showStars: true, showLanguages: true, showRecent: true, useLinkedGithub: true, githubOwner: "" } }, { merge: true });
+          await setDoc(doc(fs, "users", currentUser.uid), { widgets: { showStars: true, showLanguages: true, showRecent: true, useLinkedGithub: true, githubOwner: "", topLanguage: "", showSpotify: false, spotifyUser: "", showDiscord: false, discordStatus: "" } }, { merge: true });
         } catch (err2) {
           throw err2;
         }

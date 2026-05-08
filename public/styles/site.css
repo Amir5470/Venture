@@ -800,6 +800,72 @@ body.dark header, body.dark .header-icon-btn, body.dark header button {
     opacity: 1;
   }
 }
+
+/* Home profile widgets */
+#home-profile { display: block; }
+.home-widgets-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.widget-card {
+  padding: 16px 14px;
+  border-radius: 12px;
+  min-height: 72px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  background: linear-gradient(180deg, var(--surface), var(--surface-2));
+  border: 2px solid transparent;
+}
+.widget-title {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+.widget-value {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+.widget-card.top-lang { border-color: #f5c547; }
+.widget-card.discord { border-color: #6b5ce6; background: linear-gradient(180deg,#0f1724,#08101a); color:#fff; }
+.widget-card.github { border-color: #7c3aed; background: linear-gradient(180deg,#0b0b0d,#101215); color:#fff; }
+.widget-card.spotify { border-color: #1db954; background: linear-gradient(180deg,#07150a,#0c2213); color:#fff; }
+.widget-empty, .widget-loading { color: var(--text-secondary); padding: 12px; }
+
+.widget-card .widget-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  color: #fff;
+}
+.widget-card .js-badge {
+  background: linear-gradient(180deg,#f7df1e,#f0c000);
+  color: #111;
+  font-family: var(--font-mono);
+  border-radius: 8px;
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+.widget-card .discord-icon { background: linear-gradient(180deg,#4752c4,#5966ff); }
+.widget-card .github-icon { background: linear-gradient(180deg,#333,#111); }
+.widget-card .spotify-icon { background: linear-gradient(180deg,#1db954,#17a44a); }
+
+.home-widgets-grid .widget-card { display:flex; align-items:center; }
 .features {
   padding: 80px 0;
   background: var(--surface);

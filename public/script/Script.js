@@ -11,6 +11,7 @@ import {
 import { updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import { firebaseConfig } from "./secrets.js";
 import { mountGitHubWidgets } from "./profileWidgets.js";
+import { mountHomeWidgets } from "./homeWidgets.js";
 
 window.addEventListener("DOMContentLoaded", () => {
     const app  = initializeApp(firebaseConfig);
@@ -58,24 +59,33 @@ window.addEventListener("DOMContentLoaded", () => {
     const requestsBadge    = document.getElementById("requests-badge");
 
     // ── State ─────────────────────────────────────────────────────────────────
-    let currentUser   = null;
-    let allUsers      = [];
-    let pickedMembers = [];
+    let currentUser    = null;
+    let allUsers       = [];
+    let pickedMembers  = [];
+    let myFriendUids   = new Set(); // track accepted friends for quick checks
 
     // ── Auth ──────────────────────────────────────────────────────────────────
     onAuthStateChanged(auth, user => {
         if (!user) { go('/'); return; }
         currentUser = user;
-                // update simple home profile display
-                try {
-                    const hname = document.getElementById('home-display-name');
-                    const hp = document.getElementById('home-pfp');
-                    if (hname) hname.textContent = user.displayName || (user.email||'').split('@')[0] || 'You';
-                    if (hp && user.photoURL) hp.src = user.photoURL;
-                } catch (e) {}
+        // update simple home profile display
+        try {
+            const hname = document.getElementById('home-display-name');
+            const hp = document.getElementById('home-pfp');
+            if (hname) hname.textContent = user.displayName || (user.email||'').split('@')[0] || 'You';
+            if (hp && user.photoURL) hp.src = user.photoURL;
+        } catch (e) {}
+            // show home profile section and widgets
+            try {
+                const homeProfileEl = document.getElementById('home-profile');
+                if (homeProfileEl) homeProfileEl.style.display = 'block';
+                try { mountHomeWidgets('home-widgets', currentUser.uid); } catch (e) { console.warn('mountHomeWidgets failed', e); }
+            } catch (e) {}
+        // Start friend watcher early so we can show friend placeholders in DMs
+        loadFriends(); // keep an updated set of accepted friends
+        loadFriendRequests();
         loadDMs();
         loadGroupChats();
-        loadFriendRequests();
     });
 
     // ── Mobile sidebar ────────────────────────────────────────────────────────
@@ -102,6 +112,7 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     // ── Fuzzy search ─────────────────────────────────────────────────────────
+    const handleSearch = async () => {
     const editDistance = (s1, s2) => {
         s1 = s1.toLowerCase(); s2 = s2.toLowerCase();
         const costs = [];
@@ -129,9 +140,6 @@ window.addEventListener("DOMContentLoaded", () => {
         if (length === 0) return 1.0;
         return (length - editDistance(longer, shorter)) / length;
     };
-
-    // ── User search (right panel) ─────────────────────────────────────────────
-    const handleSearch = async () => {
         const query = searchbar.value.trim().toLowerCase();
         if (!query) return;
 
@@ -207,7 +215,10 @@ window.addEventListener("DOMContentLoaded", () => {
                     <button class="pf-btn primary" id="add-friend-pf">Add Friend</button>
                     <button class="pf-btn secondary" id="message-friend-pf">Message</button>
                 </div>
-                <div id="pf-search-widgets" style="margin-top:12px"></div>
+                <div id="pf-search-widgets" style="margin-top:12px">
+                    <div id="pf-github-widgets"></div>
+                    <div id="pf-home-widgets" style="margin-top:12px"></div>
+                </div>
                 <button id="pf-search-back">← Back to results</button>
             </div>`;
 
@@ -233,8 +244,13 @@ window.addEventListener("DOMContentLoaded", () => {
                 if (!snap.exists()) {
                     const targetName = user.username || user.uid;
                     const myName = currentUser.displayName || (currentUser.email || "").split("@")[0];
-                    await set(dmRef, {
-                        members: { [currentUser.uid]: myName, [user.uid]: targetName },
+
+                    // Step 1: create members child (allowed by rules when members doesn't exist)
+                    const membersRef = ref(rtdb, `dms/${dmId}/members`);
+                    await set(membersRef, { [currentUser.uid]: myName, [user.uid]: targetName });
+
+                    // Step 2: set metadata now that members exists
+                    await update(ref(rtdb, `dms/${dmId}`), {
                         lastMessage: "",
                         lastAt: Date.now(),
                         createdAt: Date.now()
@@ -246,8 +262,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
         document.getElementById("pf-search-back").addEventListener("click", handleSearch);
 
-        // Mount widgets for this user (will read users/{uid}.widgets to find githubOwner)
-        try { mountGitHubWidgets('pf-search-widgets', user.uid); } catch (e) { console.warn('Mount profile widgets failed', e); }
+        // Mount widgets for this user (will read users/{uid}.widgets)
+        try { mountGitHubWidgets('pf-github-widgets', user.uid); } catch (e) { console.warn('Mount profile widgets failed', e); }
+        try { mountHomeWidgets('pf-home-widgets', user.uid); } catch (e) { console.warn('Mount home widgets failed', e); }
     }
 
     const displayResults = (results) => {
@@ -279,6 +296,47 @@ window.addEventListener("DOMContentLoaded", () => {
     // ── Load DMs ──────────────────────────────────────────────────────────────
     // DMs are stored in RTDB under "dms/{dmId}" where the dmId = sorted uid pair
     // Each DM object: { members: { uid: username }, lastMessage, lastAt }
+    // Helper: coarse code detection and preview formatting
+    function isCodeLikeText(t) {
+        if (typeof t !== 'string' || !t) return false;
+        if (t.indexOf('```') !== -1) return true;
+        if (t.indexOf('const ') !== -1 || t.indexOf('function') !== -1 || t.indexOf('=>') !== -1) return true;
+        if (t.indexOf('<script') !== -1 || t.indexOf('</') !== -1) return true;
+        const nonAlnum = (t.match(/[^a-zA-Z0-9\s]/g) || []).length;
+        if (nonAlnum > 40) return true;
+        return false;
+    }
+
+    function formatPreview(text) {
+        if (!text) return "No messages yet";
+        if (typeof text !== 'string') text = String(text);
+        if (isCodeLikeText(text) || text.indexOf('\n') !== -1) return "[Code snippet]";
+        const oneLine = text.replace(/\s+/g, ' ').trim();
+        return oneLine.length > 120 ? oneLine.slice(0, 117) + '…' : oneLine;
+    }
+
+    // Ensure a DM exists in RTDB by creating `members` first then metadata.
+    async function ensureDMExists(dmId, otherUid, otherName) {
+        const dmRef = ref(rtdb, `dms/${dmId}`);
+        try {
+            const snap = await get(dmRef);
+            if (snap.exists()) return true;
+            const myName = currentUser.displayName || (currentUser.email || '').split('@')[0];
+            const membersRef = ref(rtdb, `dms/${dmId}/members`);
+            await set(membersRef, { [currentUser.uid]: myName, [otherUid]: otherName });
+            await update(ref(rtdb, `dms/${dmId}`), { lastMessage: "", lastAt: Date.now(), createdAt: Date.now() });
+            return true;
+        } catch (err) {
+            if (err && err.message && err.message.toLowerCase().includes('permission')) {
+                console.warn('Could not create DM due to RTDB rules; permission denied for', otherUid);
+                alert('Could not create DM due to server rules. Try messaging from their profile.');
+            } else {
+                console.error('Ensure DM failed', err);
+                alert('Could not create DM. See console for details.');
+            }
+            return false;
+        }
+    }
     function loadDMs() {
         if (!currentUser) return;
 
@@ -296,18 +354,25 @@ window.addEventListener("DOMContentLoaded", () => {
 
             dmList.innerHTML = "";
 
-            if (myDMs.length === 0) {
-                dmList.innerHTML = `<div class="empty-state"><div class="empty-icon">💬</div><p>No direct messages yet. Maybe get some friends.</p></div>`;
-                return;
+            // If there are no RTDB DM objects yet, continue —
+            // placeholders for accepted friends will be appended below.
+
+            // Deduplicate DMs by the other user's UID (collapse multiple DMs with same other user)
+            const dmByOther = new Map();
+            for (const dm of myDMs) {
+                const members = dm.members || {};
+                const otherUid = Object.keys(members).find(uid => uid !== currentUser.uid);
+                if (!otherUid) continue;
+                const existing = dmByOther.get(otherUid);
+                if (!existing || (dm.lastAt || 0) > (existing.lastAt || 0)) dmByOther.set(otherUid, dm);
             }
+            const uniqueDMs = Array.from(dmByOther.values()).sort((a, b) => (b.lastAt || 0) - (a.lastAt || 0));
 
-            myDMs.sort((a, b) => (b.lastAt || 0) - (a.lastAt || 0));
-
-            // Collect unique other-user UIDs and batch fetch their Firestore docs to reduce reads
-            const otherUids = Array.from(new Set(myDMs.map(dm => {
-                const members = dm.members || {}
-                return Object.keys(members).find(uid => uid !== currentUser.uid)
-            }).filter(Boolean)))
+            // Collect other-user UIDs and batch fetch their Firestore docs to reduce reads
+            const otherUids = Array.from(new Set(uniqueDMs.map(dm => {
+                const members = dm.members || {};
+                return Object.keys(members).find(uid => uid !== currentUser.uid);
+            }).filter(Boolean)));
 
             const userDocsMap = {}
             if (otherUids.length > 0) {
@@ -320,12 +385,58 @@ window.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
-            // Build list and use cached userDocsMap for pfp lookups
-            for (const dm of myDMs) {
+            // Add placeholder entries for accepted friends who don't yet have a DM in RTDB.
+            try {
+                // Use the in-memory friends set when available; otherwise fetch from Firestore once
+                let friendSet = myFriendUids;
+                if (!friendsInitialized) {
+                    try {
+                        const friendsSnap = await getDocs(collection(fs, "users", currentUser.uid, "friends"));
+                        const s2 = new Set();
+                        friendsSnap.forEach(d => { const data = d.data(); if (data && data.accepted === true) s2.add(d.id); });
+                        friendSet = s2;
+                    } catch (e) {
+                        console.warn('Could not fetch friends for placeholder generation', e);
+                        friendSet = myFriendUids;
+                    }
+                }
+                const existingSet = new Set(otherUids);
+                const missingFriends = Array.from(friendSet).filter(uid => uid !== currentUser.uid && !existingSet.has(uid));
+                if (missingFriends.length > 0) {
+                    // Fetch missing friends' Firestore docs
+                    const morePromises = missingFriends.map(uid => getDoc(doc(fs, "users", uid)).then(s => ({ uid, snap: s })).catch(() => ({ uid, snap: null })));
+                    const moreResults = await Promise.all(morePromises);
+                    moreResults.forEach(r => { if (r.snap && r.snap.exists()) userDocsMap[r.uid] = r.snap.data() });
+
+                    // Create placeholder DM objects and append them (they have lastAt = 0 so appear after active DMs)
+                    for (const friendUid of missingFriends) {
+                        const friendName = (userDocsMap[friendUid] && (userDocsMap[friendUid].username || userDocsMap[friendUid].displayName)) || friendUid;
+                        const dmId = [currentUser.uid, friendUid].sort().join("_");
+                        uniqueDMs.push({ id: dmId, members: { [currentUser.uid]: currentUser.displayName || (currentUser.email || "").split("@")[0], [friendUid]: friendName }, lastMessage: "", lastAt: 0, placeholder: true });
+                    }
+                }
+            } catch (err) {
+                console.warn('Failed to add friend placeholders', err);
+            }
+
+            // Build list and use cached userDocsMap for name/pfp lookups
+            if (uniqueDMs.length === 0) {
+                dmList.innerHTML = `<div class="empty-state"><div class="empty-icon">💬</div><p>No direct messages yet. Maybe get some friends.</p></div>`;
+                return;
+            }
+            for (const dm of uniqueDMs) {
                 const members = dm.members || {};
                 // Find the other person
                 const otherUid = Object.keys(members).find(uid => uid !== currentUser.uid);
-                const otherName = otherUid ? members[otherUid] : "Unknown";
+                // Prefer the authoritative username from Firestore when available
+                let otherName = "Unknown";
+                if (otherUid) {
+                    if (userDocsMap[otherUid]) {
+                        otherName = userDocsMap[otherUid].username || userDocsMap[otherUid].displayName || members[otherUid] || otherUid;
+                    } else {
+                        otherName = members[otherUid] || otherUid;
+                    }
+                }
                 const initials = getInitials(otherName);
 
                 // Look up other user's pfp from cached map
@@ -354,15 +465,20 @@ window.addEventListener("DOMContentLoaded", () => {
 
                 const infoEl = document.createElement("div");
                 infoEl.className = "conv-info";
+                const preview = formatPreview(dm.lastMessage || "");
                 infoEl.innerHTML = `
                     <div class="conv-name">${escapeHtml(otherName)}</div>
-                    <div class="conv-preview">${escapeHtml(dm.lastMessage || "No messages yet")}</div>`;
+                    <div class="conv-preview">${escapeHtml(preview)}</div>`;
 
                 item.appendChild(avatarEl);
                 item.appendChild(infoEl);
 
-                item.addEventListener("click", () => {
+                item.addEventListener("click", async () => {
                     closeSidebar();
+                    if (dm.placeholder) {
+                        const ok = await ensureDMExists(dm.id, otherUid, otherName);
+                        if (!ok) return;
+                    }
                     go(`/chat/?dm=${dm.id}`)
                 });
 
@@ -478,11 +594,19 @@ window.addEventListener("DOMContentLoaded", () => {
         container.innerHTML = "";
         if (!q) return;
 
+        // Only allow selecting users who are accepted friends
         const matches = allUsers.filter(u => {
             if (u.uid === currentUser.uid) return false;
+            // must be an accepted friend
+            if (!myFriendUids.has(u.uid)) return false;
             const name = (u.username || "").toLowerCase();
             return name.includes(q) || similarity(name, q) >= 0.6;
         }).slice(0, 8);
+
+        if (matches.length === 0) {
+            container.innerHTML = `<p style="color:var(--text-muted);font-size:13px;padding:10px 0">No matching friends. Add friends to create group chats.</p>`;
+            return;
+        }
 
         matches.forEach(u => {
             const row = document.createElement("div");
@@ -634,6 +758,75 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // ── Load Friends (accepted) ──────────────────────────────────────────────
+    // Keep a local Set of UIDs for users who have accepted friendship.
+    let friendsInitialized = false;
+    function loadFriends() {
+        if (!currentUser) return;
+        const friendsRef = collection(fs, "users", currentUser.uid, "friends");
+        onSnapshot(friendsRef, async snap => {
+            const s = new Set();
+            const acceptedUids = [];
+            snap.forEach(d => {
+                const data = d.data();
+                if (data && data.accepted === true) {
+                    s.add(d.id);
+                    acceptedUids.push(d.id);
+                }
+            });
+
+            // On the very first snapshot just seed the local Set without creating DMs
+            if (!friendsInitialized) {
+                myFriendUids = s;
+                friendsInitialized = true;
+                return;
+            }
+
+            // Detect newly-accepted friends and ensure a DM exists for each
+            const newFriends = acceptedUids.filter(uid => !myFriendUids.has(uid));
+            myFriendUids = s;
+
+            if (newFriends.length > 0) {
+                for (const friendUid of newFriends) {
+                    try {
+                        const dmId = [currentUser.uid, friendUid].sort().join("_");
+                        const dmRef = ref(rtdb, `dms/${dmId}`);
+                        const dmSnap = await get(dmRef);
+                        if (!dmSnap.exists()) {
+                            // Fetch friend's username if available
+                            let friendName = friendUid;
+                            try {
+                                const friendDoc = await getDoc(doc(fs, "users", friendUid));
+                                if (friendDoc && friendDoc.exists()) friendName = friendDoc.data().username || friendUid;
+                            } catch (_) {}
+
+                            const myName = currentUser.displayName || (currentUser.email || "").split("@")[0];
+
+                            // Create members first (allowed by rules when members doesn't exist)
+                            const membersRef = ref(rtdb, `dms/${dmId}/members`);
+                            await set(membersRef, { [currentUser.uid]: myName, [friendUid]: friendName });
+
+                            // Then set metadata
+                            await update(ref(rtdb, `dms/${dmId}`), {
+                                lastMessage: "",
+                                lastAt: Date.now(),
+                                createdAt: Date.now()
+                            });
+                        }
+                    } catch (err) {
+                        // Permission errors are expected when RTDB rules are restrictive.
+                        // Fail gracefully and keep the UI functional.
+                        if (err && err.message && err.message.toLowerCase().includes('permission')) {
+                            console.warn('Could not create DM due to RTDB rules; permission denied for', friendUid);
+                        } else {
+                            console.error('Ensure DM for new friend failed', err);
+                        }
+                    }
+                }
+            }
+        }, err => console.error('friends onSnapshot error', err));
+    }
+
     async function renderRequestsList(pending) {
         requestsList.innerHTML = "";
         if (pending.length === 0) {
@@ -698,11 +891,12 @@ window.addEventListener("DOMContentLoaded", () => {
 
                 const myName = currentUser.displayName || currentUser.email.split("@")[0];
 
-                await set(dmRef, {
-                    members: {
-                        [currentUser.uid]: myName,
-                        [senderUid]: senderName
-                    },
+                // Create members first (allowed by rules when members doesn't exist)
+                const membersRef = ref(rtdb, `dms/${dmId}/members`);
+                await set(membersRef, { [currentUser.uid]: myName, [senderUid]: senderName });
+
+                // Then set metadata
+                await update(ref(rtdb, `dms/${dmId}`), {
                     lastMessage: "",
                     lastAt: Date.now(),
                     createdAt: Date.now()
@@ -717,10 +911,66 @@ window.addEventListener("DOMContentLoaded", () => {
         } catch (err) { console.error("Reject error:", err); }
     }
 
+    async function migrateCreateDMsForAllFriends() {
+        if (!currentUser) throw new Error('not-signed-in');
+        const friendsSnap = await getDocs(collection(fs, 'users', currentUser.uid, 'friends'));
+        const accepted = [];
+        friendsSnap.forEach(d => { const data = d.data(); if (data && data.accepted === true) accepted.push(d.id); });
+
+        let created = 0, existed = 0, failed = 0;
+        for (const friendUid of accepted) {
+            if (!friendUid || friendUid === currentUser.uid) continue;
+            const dmId = [currentUser.uid, friendUid].sort().join("_");
+            const dmRef = ref(rtdb, `dms/${dmId}`);
+            try {
+                const snap = await get(dmRef);
+                if (snap.exists()) { existed++; continue; }
+
+                // fetch friend's username if available
+                let friendName = friendUid;
+                try { const fd = await getDoc(doc(fs, 'users', friendUid)); if (fd && fd.exists()) friendName = fd.data().username || friendUid; } catch (_) {}
+
+                const myName = currentUser.displayName || (currentUser.email || '').split('@')[0];
+                const membersRef = ref(rtdb, `dms/${dmId}/members`);
+                await set(membersRef, { [currentUser.uid]: myName, [friendUid]: friendName });
+                await update(ref(rtdb, `dms/${dmId}`), { lastMessage: "", lastAt: Date.now(), createdAt: Date.now() });
+                created++;
+            } catch (err) {
+                failed++;
+                if (err && err.message && err.message.toLowerCase().includes('permission')) {
+                    console.warn('Could not create DM due to RTDB rules; permission denied for', friendUid);
+                } else {
+                    console.error('Failed to create DM for', friendUid, err);
+                }
+            }
+            // small pause to avoid spamming writes
+            await new Promise(r => setTimeout(r, 180));
+        }
+        return { created, existed, failed };
+    }
+
     openRequestsBtn.addEventListener("click", () => requestsBackdrop.classList.add("open"));
     requestsClose.addEventListener("click", () => requestsBackdrop.classList.remove("open"));
     requestsBackdrop.addEventListener("click", e => {
         if (e.target === requestsBackdrop) requestsBackdrop.classList.remove("open");
+    });
+
+    // One-click migration: create missing RTDB DM objects for all accepted friends
+    const migrateBtn = document.getElementById('migrate-dms-btn');
+    if (migrateBtn) migrateBtn.addEventListener('click', async () => {
+        if (!currentUser) { alert('Please sign in first.'); return; }
+        if (!confirm('Create missing RTDB DM objects for all accepted friends? This will attempt writes for each friend.')) return;
+        migrateBtn.disabled = true;
+        try {
+            const summary = await migrateCreateDMsForAllFriends();
+            alert(`Migration complete. Created: ${summary.created}, Skipped(existing): ${summary.existed}, Failed: ${summary.failed}`);
+            console.log('DM migration summary', summary);
+        } catch (e) {
+            console.error('Migration failed', e);
+            alert('Migration failed. See console for details.');
+        } finally {
+            migrateBtn.disabled = false;
+        }
     });
 
     // ── Utility ───────────────────────────────────────────────────────────────

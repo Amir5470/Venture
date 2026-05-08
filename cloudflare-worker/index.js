@@ -256,11 +256,108 @@ export default {
             console.warn('firebase write failed for', owner, name, e);
           }
         }
+        // If caller requests the raw repo list returned, include a trimmed list
+        const includeRepos = url.searchParams.get('return') || url.searchParams.get('raw') || url.searchParams.get('repos');
+        if (includeRepos) {
+          const trimmed = (repos || []).map(item => ({
+            owner,
+            name: item.name,
+            url: item.html_url,
+            stargazers_count: item.stargazers_count || 0,
+            watchers_count: item.watchers_count || 0,
+            language: item.language || null,
+            pushed_at: item.pushed_at || null,
+          }));
+          return jsonResponse({ success: true, written: repos.length, repos: trimmed });
+        }
         return jsonResponse({ success: true, written: repos.length });
       } catch (e) {
         console.warn('backend fetch failed', e);
         return jsonResponse({ success: false, error: 'backend_fetch_error', details: String(e) }, 500);
       }
+    }
+
+    // Spotify: fetch currently-playing for a user by uid
+    if (url.pathname === '/spotify/fetch' && request.method === 'GET') {
+      const uid = url.searchParams.get('uid');
+      if (!uid) return jsonResponse({ success: false, error: 'missing_uid' }, 400);
+      try {
+        // Check for cached status first
+        try {
+          const cached = await readFromFirebase(env, `/spotify/status/${encodeURIComponent(uid)}`);
+          if (cached && cached.nowPlaying) return jsonResponse({ success: true, nowPlaying: cached.nowPlaying, cached: true });
+        } catch (e) { /* ignore cache read errors */ }
+
+        // Read tokens for this user from RTDB (expected shape: { access_token, refresh_token, expires_at })
+        let tokenData = null;
+        try { tokenData = await readFromFirebase(env, `/spotify/tokens/${encodeURIComponent(uid)}`); } catch (e) { tokenData = null; }
+
+        if (!tokenData || !tokenData.access_token) return jsonResponse({ success: false, error: 'no_token_for_user' }, 404);
+
+        // Attempt to call Spotify API
+        const spRes = await fetch('https://api.spotify.com/v1/me/player/currently-playing', { headers: { Authorization: `Bearer ${tokenData.access_token}` } });
+        if (spRes.status === 204) return jsonResponse({ success: false, error: 'nothing_playing' }, 200);
+        if (spRes.status === 401 && tokenData.refresh_token && env.SPOTIFY_CLIENT_ID && env.SPOTIFY_CLIENT_SECRET) {
+          // try refresh
+          try {
+            const body = `grant_type=refresh_token&refresh_token=${encodeURIComponent(tokenData.refresh_token)}`;
+            const basicAuth = btoa(`${env.SPOTIFY_CLIENT_ID}:${env.SPOTIFY_CLIENT_SECRET}`);
+            const r = await fetch('https://accounts.spotify.com/api/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', Authorization: 'Basic ' + basicAuth }, body });
+            if (r.ok) {
+              const nj = await r.json();
+              tokenData.access_token = nj.access_token || tokenData.access_token;
+              tokenData.expires_at = Date.now() + ((nj.expires_in || 3600) * 1000);
+              // persist refreshed access token (best-effort)
+              try { await writeToFirebase(env, `/spotify/tokens/${encodeURIComponent(uid)}`, { access_token: tokenData.access_token, expires_at: tokenData.expires_at }); } catch (e) { console.warn('failed to persist refreshed spotify token', e); }
+              // retry
+              const spRes2 = await fetch('https://api.spotify.com/v1/me/player/currently-playing', { headers: { Authorization: `Bearer ${tokenData.access_token}` } });
+              if (spRes2.ok) {
+                const spj = await spRes2.json();
+                const now = formatSpotifyNowPlaying(spj);
+                try { await writeToFirebase(env, `/spotify/status/${encodeURIComponent(uid)}`, { nowPlaying: now, updatedAt: Date.now() }); } catch (e) {}
+                return jsonResponse({ success: true, nowPlaying: now, raw: spj });
+              }
+            }
+          } catch (e) { console.warn('spotify refresh failed', e); }
+        }
+
+        if (!spRes.ok) return jsonResponse({ success: false, error: 'spotify_fetch_failed', status: spRes.status }, 502);
+        const spj = await spRes.json();
+        const now = formatSpotifyNowPlaying(spj);
+        try { await writeToFirebase(env, `/spotify/status/${encodeURIComponent(uid)}`, { nowPlaying: now, updatedAt: Date.now() }); } catch (e) { console.warn('failed to cache spotify status', e); }
+        return jsonResponse({ success: true, nowPlaying: now, raw: spj });
+      } catch (e) {
+        console.warn('spotify/fetch error', e);
+        return jsonResponse({ success: false, error: 'spotify_error', details: String(e) }, 500);
+      }
+    }
+
+    // Discord: read cached status for user (bot-based presence is out-of-scope for simple worker)
+    if (url.pathname === '/discord/fetch' && request.method === 'GET') {
+      const uid = url.searchParams.get('uid');
+      if (!uid) return jsonResponse({ success: false, error: 'missing_uid' }, 400);
+      try {
+        try {
+          const cached = await readFromFirebase(env, `/discord/status/${encodeURIComponent(uid)}`);
+          if (cached && (cached.status || cached.activity)) return jsonResponse({ success: true, status: cached.status || cached.activity, cached: true });
+        } catch (e) { /* ignore */ }
+        // no cached value — indicate none
+        return jsonResponse({ success: false, error: 'no_discord_status' }, 404);
+      } catch (e) {
+        console.warn('discord/fetch error', e);
+        return jsonResponse({ success: false, error: 'discord_error', details: String(e) }, 500);
+      }
+    }
+
+    // Helper: format Spotify 'currently-playing' payload into a short string
+    function formatSpotifyNowPlaying(payload) {
+      try {
+        if (!payload || !payload.item) return '';
+        const item = payload.item;
+        const artists = (item.artists || []).map(a => a.name).filter(Boolean).join(', ');
+        const name = item.name || '';
+        return `${artists}${artists ? ' — ' : ''}${name}`;
+      } catch (e) { return '' }
     }
 
 

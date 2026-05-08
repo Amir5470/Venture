@@ -1,0 +1,87 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "dms": {
+      ".read": "auth != null",
+
+      "$dmId": {
+        ".read": "auth != null && data.child('members').child(auth.uid).exists()",
+        ".write": "auth != null && data.child('members').child(auth.uid).exists()",
+
+        ".validate": "!data.exists() ? (newData.child('members').child(auth.uid).exists()) : true",
+
+        "members": {
+          ".write": "!data.exists()"
+        },
+
+        "lastMessage": { ".validate": "newData.isString() || newData.val() === null" },
+        "lastAt":      { ".validate": "newData.isNumber() || newData.val() === null" },
+        "createdAt":   { ".validate": "newData.isNumber() || data.exists()" },
+
+        "messages": {
+          ".read": "auth != null && root.child('dms').child($dmId).child('members').child(auth.uid).exists()",
+          ".write": "auth != null && root.child('dms').child($dmId).child('members').child(auth.uid).exists()",
+
+          "$msgId": {
+            ".validate": "newData.val() === null || (newData.child('uid').val() === auth.uid && newData.child('time').isNumber())"
+          }
+        },
+
+        "typing": {
+          ".read": "auth != null && root.child('dms').child($dmId).child('members').child(auth.uid).exists()",
+          "$uid": {
+            ".write": "auth != null && $uid === auth.uid && root.child('dms').child($dmId).child('members').child(auth.uid).exists()",
+            ".validate": "newData.isBoolean() || newData.val() === null"
+          }
+        }
+      }
+    },
+
+    "groupChats": {
+      ".read": "auth != null",
+
+      "$gcId": {
+        ".read": "auth != null && data.child('members').child(auth.uid).exists()",
+
+        ".write": "auth != null && ((!data.exists() && newData.child('members').child(auth.uid).exists() && newData.child('createdBy').val() === auth.uid) || (data.exists() && data.child('members').child(auth.uid).exists()))",
+
+        "members": {
+          ".write": "!data.exists()"
+        },
+
+        "createdBy": {
+          ".validate": "!data.exists() ? (newData.val() === auth.uid) : (newData.val() === data.val())"
+        },
+
+        "createdAt": {
+          ".validate": "newData.isNumber() && (!data.exists() || newData.val() === data.val())"
+        },
+
+        "name": {
+          ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 60"
+        },
+
+        "messages": {
+          ".read": "auth != null && root.child('groupChats').child($gcId).child('members').child(auth.uid).exists()",
+          ".write": "auth != null && root.child('groupChats').child($gcId).child('members').child(auth.uid).exists()",
+
+          "$msgId": {
+            ".validate": "newData.val() === null || (newData.child('uid').val() === auth.uid && newData.child('time').isNumber())"
+          }
+        },
+
+        "typing": {
+          ".read": "auth != null && root.child('groupChats').child($gcId).child('members').child(auth.uid).exists()",
+          "$uid": {
+            ".write": "auth != null && $uid === auth.uid && root.child('groupChats').child($gcId).child('members').child(auth.uid).exists()",
+            ".validate": "newData.isBoolean() || newData.val() === null"
+          }
+        },
+
+        ".validate": "newData.exists() || data.child('createdBy').val() === auth.uid"
+      }
+    }
+  }
+}

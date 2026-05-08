@@ -101,9 +101,20 @@ onAuthStateChanged(auth, async user => {
             const dmSnap = await get(ref(db, basePath))
             if (dmSnap.exists()) {
                 const members = dmSnap.val().members || {}
-                const otherName = Object.entries(members)
-                    .filter(([id]) => id !== uid)
-                    .map(([, name]) => name)[0]
+                const otherUid = Object.keys(members).find(id => id !== uid) || Object.keys(members)[0]
+                let otherName = otherUid ? (members[otherUid] || otherUid) : null
+
+                // If the stored name looks like a raw UID or is missing, prefer the
+                // authoritative Firestore `users/{uid}` document username.
+                const looksLikeUid = otherName && otherName === otherUid
+                    || (typeof otherName === 'string' && /^[A-Za-z0-9_-]{16,}$/.test(otherName))
+                if (otherUid && looksLikeUid) {
+                    try {
+                        const userDoc = await getDoc(doc(fs, "users", otherUid))
+                        if (userDoc && userDoc.exists()) otherName = userDoc.data().username || userDoc.data().displayName || otherName
+                    } catch (_) {}
+                }
+
                 if (otherName) chatTitle.textContent = `@ ${otherName}`
             }
         } catch (_) {}

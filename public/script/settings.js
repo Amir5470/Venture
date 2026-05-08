@@ -22,6 +22,7 @@ import {
   updateDoc,
   setDoc,
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { getDatabase, ref as rtdbRef, set as rtdbSet } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 import { arrayUnion } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 import {
   getStorage,
@@ -35,6 +36,7 @@ import { firebaseConfig } from "./secrets.js";
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const fs = getFirestore(app);
+const db = getDatabase(app);
 const storage = getStorage(app);
 
 // Local dev preview mode (bypass Firebase for UI testing)
@@ -126,6 +128,8 @@ let currentUser = null;
 // Provider instances for linking
 const googleProvider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();
+// Request repo scopes so we can read user's repositories when linking
+try { githubProvider.addScope('repo'); } catch (e) { /* ignore if not supported */ }
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
@@ -633,6 +637,62 @@ function friendlyError(code) {
   return map[code] || "Something went wrong. Check the console.";
 }
 
+// Fetch top repos via GitHub GraphQL (using the user's OAuth token) and
+// persist a copy to the Realtime Database (for widgets) and Firestore (fallback).
+async function fetchAndPersistGitHubRepos(token, owner, uid) {
+  if (!token || !owner || !uid) return;
+  try {
+    const query = `query($login:String!,$first:Int!){ repositoryOwner(login:$login){ ... on User { repositories(first:$first, ownerAffiliations: OWNER, orderBy:{field:STARGAZERS,direction:DESC}){ nodes{ name url stargazerCount pushedAt primaryLanguage { name } defaultBranchRef { target { ... on Commit { history { totalCount } } } } watchers { totalCount } } } } ... on Organization { repositories(first:$first, orderBy:{field:STARGAZERS,direction:DESC}){ nodes{ name url stargazerCount pushedAt primaryLanguage { name } defaultBranchRef { target { ... on Commit { history { totalCount } } } } watchers { totalCount } } } } }`;
+    console.debug('fetchAndPersistGitHubRepos: starting fetch for owner', owner)
+    const resp = await fetch('https://api.github.com/graphql', {
+      method: 'POST',
+      headers: { Authorization: `bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, variables: { login: owner, first: 50 } }),
+    });
+    if (!resp.ok) {
+      console.warn('GitHub GraphQL fetch failed', resp.status);
+      return;
+    }
+    const json = await resp.json();
+    const nodes = json.data?.user?.repositories?.nodes || [];
+    const snapshotForFs = {};
+    for (const n of nodes) {
+      const name = n.name;
+      const stat = {
+        owner,
+        name,
+        url: n.url || `https://github.com/${owner}/${name}`,
+        stargazerCount: n.stargazerCount || 0,
+        watchersCount: n.watchers?.totalCount || 0,
+        commits: n.defaultBranchRef?.target?.history?.totalCount || null,
+        pushedAt: n.pushedAt || null,
+        primaryLanguage: n.primaryLanguage ? { name: n.primaryLanguage.name } : null,
+      };
+      // Write to RTDB for widgets (best-effort)
+      try {
+        await rtdbSet(rtdbRef(db, `github/repos/${owner}/${name}`), stat);
+        console.debug('fetchAndPersistGitHubRepos: wrote RTDB', owner, name)
+      } catch (e) {
+        console.warn('RTDB write failed for', owner, name, e);
+      }
+      snapshotForFs[name] = stat;
+    }
+
+    // Persist a snapshot to Firestore as a fallback for widgets
+    try {
+      await updateDoc(doc(fs, 'users', uid), { githubRepos: snapshotForFs });
+    } catch (e) {
+      try {
+        await setDoc(doc(fs, 'users', uid), { githubRepos: snapshotForFs }, { merge: true });
+      } catch (ee) {
+        console.warn('Failed to persist githubRepos to Firestore', ee);
+      }
+    }
+  } catch (e) {
+    console.warn('fetchAndPersistGitHubRepos failed', e);
+  }
+}
+
 // ── Linked accounts (placeholder actions) ───────────────────────────────────
 const linkGoogleBtn = $("link-google-btn");
 if (linkGoogleBtn) {
@@ -691,9 +751,14 @@ if (linkGithubBtn) {
 
       // Try to obtain the OAuth access token and fetch the GitHub login
       let githubLogin = null;
+      let githubToken = null;
       try {
+        console.debug('link-github: oauth result', res)
         const cred = GithubAuthProvider.credentialFromResult(res);
-        const token = cred?.accessToken || res?.credential?.accessToken;
+        console.debug('link-github: credentialFromResult', cred)
+        const token = cred?.accessToken || res?.credential?.accessToken || res?.additionalUserInfo?.profile?.access_token;
+        githubToken = token || null;
+        console.debug('link-github: resolved token present?', !!githubToken)
         if (token) {
           const r = await fetch("https://api.github.com/user", {
             headers: { Authorization: `token ${token}`, Accept: "application/vnd.github.v3+json" },
@@ -732,6 +797,17 @@ if (linkGithubBtn) {
 
       toast("GitHub account linked!");
       refreshLinkedButtons();
+
+      // Kick off an initial fetch of the user's top repos and persist them
+      // so the profile widgets can show up immediately.
+      try {
+        if (githubToken && githubLogin) {
+          // fire-and-forget; best-effort
+          fetchAndPersistGitHubRepos(githubToken, githubLogin, currentUser.uid);
+        }
+      } catch (e) {
+        console.warn('Failed to trigger repo fetch', e);
+      }
     } catch (e) {
       console.error(e);
       if (
@@ -852,6 +928,15 @@ if (saveWidgetsBtn) {
           throw err2;
         }
       }
+      // persist token & owner into RTDB under /github/tokens/{uid} (server-only consumption)
+      try {
+        const token = $("github-token-input")?.value?.trim() || null;
+        const ownerVal = widgets.githubOwner || null;
+        if (token || ownerVal) {
+          const payload = { token: token || null, owner: ownerVal || null, publicFetch: false };
+          try { await rtdbSet(rtdbRef(db, `github/tokens/${currentUser.uid}`), payload) } catch (e) { console.warn('Failed to write token to RTDB', e) }
+        }
+      } catch (e) { console.warn('persist token error', e) }
       toast("Widget settings saved");
     } catch (e) {
       console.error("Save widgets failed", e);

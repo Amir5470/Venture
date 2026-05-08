@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>GitHub Debug — Admin</title>
+  <link rel="stylesheet" href="../styles/site.css">
+  <style>
+    body{padding:18px}
+    .card{background:var(--surface-2);padding:16px;border-radius:8px}
+    textarea, input {width:100%;box-sizing:border-box}
+    pre {background:var(--surface-1);padding:12px;border-radius:6px;overflow:auto;max-height:420px}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>GitHub Debug (Admin)</h1>
+      <p>Inspect `githubRepos` content in Realtime Database and Firestore.</p>
+    </header>
+
+    <main>
+      <div id="not-signed-in" class="card">Sign in to access this page.</div>
+
+      <div id="no-access" class="card" style="display:none">You are not authorized to view this page.</div>
+
+      <div id="debug-ui" style="display:none">
+        <div class="card">
+          <label>GitHub owner (username or org)</label>
+          <input id="owner-input" placeholder="e.g. amir" />
+          <label>Firebase UID (optional; used for Firestore lookup)</label>
+          <input id="uid-input" placeholder="firebase uid (optional)" />
+          <div style="margin-top:8px;display:flex;gap:8px">
+            <button id="load-rtdb-btn" class="btn">Load RTDB</button>
+            <button id="load-fs-btn" class="btn">Load Firestore</button>
+            <button id="open-profile-btn" class="btn">Open Profile Preview</button>
+          </div>
+          <div style="margin-top:12px">
+            <label>Personal GitHub token (for testing only)</label>
+            <input id="token-input" placeholder="ghp_... or PAT" />
+            <div style="margin-top:8px;display:flex;gap:8px">
+              <button id="fetch-github-btn" class="btn btn-accent">Fetch from GitHub & Write RTDB</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:12px"></div>
+
+        <div class="card">
+          <h3>RTDB Result</h3>
+          <pre id="rtdb-result">(not loaded)</pre>
+        </div>
+
+        <div style="height:12px"></div>
+
+        <div class="card">
+          <h3>Firestore Result</h3>
+          <pre id="fs-result">(not loaded)</pre>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="../script/adminGithubDebug.js"></script>
+</body>
+</html>

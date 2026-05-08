@@ -91,6 +91,26 @@ async function writeToFirebase(env, path, obj) {
   return res;
 }
 
+async function readFromFirebase(env, path) {
+  if (!env.FIREBASE_DATABASE_URL) throw new Error('missing FIREBASE_DATABASE_URL');
+  const base = env.FIREBASE_DATABASE_URL.replace(/\/$/, '');
+  let url = `${base}${path}.json`;
+  const headers = {};
+  if (env.FIREBASE_ACCESS_TOKEN) {
+    headers['Authorization'] = `Bearer ${env.FIREBASE_ACCESS_TOKEN}`;
+  } else if (env.FIREBASE_DATABASE_SECRET) {
+    url += `?auth=${encodeURIComponent(env.FIREBASE_DATABASE_SECRET)}`;
+  } else {
+    throw new Error('no firebase credentials configured (FIREBASE_ACCESS_TOKEN or FIREBASE_DATABASE_SECRET)');
+  }
+  const res = await fetch(url, { method: 'GET', headers });
+  if (!res.ok) {
+    const text = await res.text().catch(()=>'');
+    throw new Error(`firebase read failed ${res.status} ${text}`);
+  }
+  return await res.json();
+}
+
 async function fetchGitHubGraphQL(owner, name, token) {
   if (!token) throw new Error('missing github token for graphQL');
   const query = `\n    query ($owner: String!, $name: String!) {\n      repository(owner: $owner, name: $name) {\n        name\n        url\n        stargazerCount\n        pushedAt\n        primaryLanguage { name }\n      }\n    }\n  `;
@@ -184,6 +204,63 @@ export default {
         if (owner && name) await writeToFirebase(env, `/github/repos/${encodeURIComponent(owner)}/${encodeURIComponent(name)}`, repoStats);
       } catch (e) { console.warn('firebase write failed', e); }
       return new Response('ok', { status: 200, headers: CORS_HEADERS });
+    }
+
+    // Trigger backend fetch for a user's repos using their stored token in RTDB
+    if (url.pathname === '/github/fetch' && request.method === 'GET') {
+      const owner = url.searchParams.get('owner');
+      const uid = url.searchParams.get('uid');
+      if (!owner) return jsonResponse({ success: false, error: 'missing_owner' }, 400);
+      try {
+        let token = null;
+        if (uid) {
+          // Read token metadata from RTDB: /github/tokens/{uid}
+          const tokenData = await readFromFirebase(env, `/github/tokens/${encodeURIComponent(uid)}`);
+          if (!tokenData || !tokenData.token) return jsonResponse({ success: false, error: 'no_token_for_user' }, 404);
+          // Only proceed if owner matches or the user enabled public fetch
+          const publicFetch = !!tokenData.publicFetch;
+          if (String(tokenData.owner || '').toLowerCase() !== String(owner).toLowerCase() && !publicFetch) {
+            return jsonResponse({ success: false, error: 'fetch_not_allowed' }, 403);
+          }
+          token = tokenData.token;
+        } else {
+          // No uid provided: fall back to worker-level GitHub token (must be configured)
+          token = env.GITHUB_GRAPHQL_TOKEN || env.GITHUB_CLIENT_SECRET || null;
+          if (!token) return jsonResponse({ success: false, error: 'no_server_token' }, 403);
+        }
+
+        // Use REST list to get repositories for the owner (covers public repos)
+        const listUrl = `https://api.github.com/users/${encodeURIComponent(owner)}/repos?per_page=100`;
+        const listResp = await fetch(listUrl, { headers: { Authorization: token ? `token ${token}` : undefined, Accept: 'application/vnd.github.v3+json' } });
+        if (!listResp.ok) {
+          const text = await listResp.text().catch(()=>'');
+          return jsonResponse({ success: false, error: 'github_list_failed', status: listResp.status, body: text }, 502);
+        }
+        const repos = await listResp.json();
+        // Persist each repo to RTDB under /github/repos/{owner}/{name}
+        for (const item of repos) {
+          const name = item.name;
+          const stat = {
+            owner,
+            name,
+            url: item.html_url,
+            stargazerCount: item.stargazers_count || 0,
+            watchersCount: item.watchers_count || 0,
+            commits: null,
+            pushedAt: item.pushed_at || null,
+            primaryLanguage: item.language ? { name: item.language } : null,
+          };
+          try {
+            await writeToFirebase(env, `/github/repos/${encodeURIComponent(owner)}/${encodeURIComponent(name)}`, stat);
+          } catch (e) {
+            console.warn('firebase write failed for', owner, name, e);
+          }
+        }
+        return jsonResponse({ success: true, written: repos.length });
+      } catch (e) {
+        console.warn('backend fetch failed', e);
+        return jsonResponse({ success: false, error: 'backend_fetch_error', details: String(e) }, 500);
+      }
     }
 
 

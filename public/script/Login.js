@@ -29,6 +29,7 @@ function getContinueUrl() {
 
 const googleProvider = new GoogleAuthProvider()
 const githubProvider = new GithubAuthProvider()
+try { githubProvider.addScope && githubProvider.addScope('repo') } catch (e) {}
 
 const GoogleBtn  = document.getElementById('GoogleBtn')
 const GithubBtn  = document.getElementById('GithubBtn')

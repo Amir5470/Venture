@@ -1,8 +1,8 @@
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js"
+import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js"
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js"
-import { firebaseConfig } from "./secrets.js"
+import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js"
+import { firebaseConfig, WORKER_URL } from "./secrets.js"
 
 const app = (getApps && getApps().length) ? getApps()[0] : initializeApp(firebaseConfig)
 const db = getDatabase(app)
@@ -40,6 +40,7 @@ function renderInto(container, reposObj, widgets = {}) {
   const showStars = widgets.showStars === undefined ? true : !!widgets.showStars
   const showLanguages = widgets.showLanguages === undefined ? true : !!widgets.showLanguages
   const showRecent = widgets.showRecent === undefined ? true : !!widgets.showRecent
+  const showTop = widgets.showTopRepos === undefined ? true : !!widgets.showTopRepos
 
   const cards = []
   if (showStars) {
@@ -64,6 +65,17 @@ function renderInto(container, reposObj, widgets = {}) {
         <div class="widget-title">Recent Activity</div>
         <div class="widget-list">
           ${recent.map(r=>`<div class="repo-row"><a href="${escapeHtml(r.url||`https://github.com/${r.owner}/${r.name}`)}" target="_blank">${escapeHtml((r.owner||'') + '/' + (r.name||''))}</a><span class="repo-time">${new Date(r.pushedAt||r.last_updated||r.updated_at).toLocaleString()}</span></div>`).join('')}
+        </div>
+      </div>`)
+  }
+
+  if (showTop) {
+    const topByStars = repos.slice().sort((a,b)=> (Number(b.stargazerCount)||0) - (Number(a.stargazerCount)||0)).slice(0,5)
+    cards.push(`
+      <div class="widget-card">
+        <div class="widget-title">Top Repositories</div>
+        <div class="widget-list">
+          ${topByStars.map(r=>`<div class="repo-row"><a href="${escapeHtml(r.url||`https://github.com/${r.owner}/${r.name}`)}" target="_blank">${escapeHtml((r.owner||'') + '/' + (r.name||''))}</a><span class="repo-meta">★ ${Number(r.stargazerCount)||0} • 👁 ${Number(r.watchersCount||r.watchers||0)} • ⬤ ${Number(r.commits||0)}</span></div>`).join('')}
         </div>
       </div>`)
   }
@@ -99,10 +111,59 @@ export function mountGitHubWidgets(containerId, uidParam) {
         }
         console.debug('profileWidgets: uid', u, 'widgets=', widgets, 'resolvedOwner=', owner)
         if (owner) {
+          // annotate widgets with the uid of the user who owns this mapping
+          widgets.ownerUid = u;
           subscribeToOwner(owner, widgets);
-        } else {
-          renderEmpty(container);
+          return
         }
+
+        // No explicit owner saved — try reading a token entry in RTDB which may include an `owner` field
+        try {
+          const tokenRef = ref(db, `github/tokens/${u}`);
+          const tokenSnap = await get(tokenRef);
+          if (tokenSnap && tokenSnap.exists()) {
+            const tdata = tokenSnap.val();
+            const tokenOwner = (tdata && (tdata.owner || tdata.githubOwner)) || null;
+            if (tokenOwner) {
+              console.debug('profileWidgets: found owner from RTDB token entry', tokenOwner)
+              widgets.ownerUid = u;
+              subscribeToOwner(tokenOwner, widgets);
+              return
+            }
+          }
+        } catch (e) {
+          console.debug('profileWidgets: failed to read github/tokens for uid', u, e)
+        }
+
+        // No explicit owner saved — attempt to auto-detect a GitHub owner
+        // by checking common candidates in RTDB (username, displayName variations)
+        const candidates = [];
+        if (data.username) candidates.push(String(data.username).trim());
+        if (data.githubOwner) candidates.push(String(data.githubOwner).trim());
+        if (data.displayName) candidates.push(String(data.displayName).trim());
+        // add lower/no-space variants
+        for (const c of [...candidates]) {
+          const lc = (c || '').toLowerCase().replace(/\s+/g, '');
+          if (lc && !candidates.includes(lc)) candidates.push(lc);
+        }
+
+        for (const cand of candidates) {
+          if (!cand) continue;
+          try {
+            const nodeRef = ref(db, `github/repos/${encodeURIComponent(cand)}`);
+            const nodeSnap = await get(nodeRef);
+            if (nodeSnap.exists()) {
+              console.debug('profileWidgets: auto-detected owner', cand, 'for uid', u)
+              subscribeToOwner(cand, widgets);
+              return
+            }
+          } catch (e) {
+            console.warn('profileWidgets: auto-detect RTDB check failed for', cand, e)
+          }
+        }
+
+        // nothing found
+        renderEmpty(container);
       } catch (e) {
         console.warn('Failed to resolve profile widgets owner', e);
         renderEmpty(container);
@@ -114,10 +175,40 @@ export function mountGitHubWidgets(containerId, uidParam) {
     // Worker writes repo stats under /github/repos/{owner}/{repo}
     const node = ref(db, `github/repos/${o}`)
     console.debug('profileWidgets: subscribing to RTDB path', `github/repos/${o}`)
-    onValue(node, snap => {
+    let hasFetched = false
+    const off = onValue(node, async snap => {
       if (!snap.exists()) {
         console.debug('profileWidgets: no data at', `github/repos/${o}`)
-        renderEmpty(container); return
+        // If we haven't already requested a backend fetch, try to trigger it.
+        if (!hasFetched) {
+          hasFetched = true
+          try {
+            // Ask the worker to populate RTDB. If widgets came from a user profile
+            // we may have the uid in Firestore; attempt to pass it via widgets.ownerUid
+            const uidParam = widgets.ownerUid || ''
+            const base = (WORKER_URL && WORKER_URL.replace(/\/$/, '')) || location.origin
+            const workerUrl = `${base.replace(/\/$/, '')}/github/fetch`
+            const url = `${workerUrl}?owner=${encodeURIComponent(o)}${uidParam ? `&uid=${encodeURIComponent(uidParam)}` : ''}`
+            console.debug('profileWidgets: requesting backend populate', url)
+            try { await fetch(url, { method: 'GET' }) } catch (e) { console.warn('profileWidgets: backend fetch request failed', e) }
+          } catch (e) { console.warn('profileWidgets: trigger backend fetch failed', e) }
+        }
+        // Try Firestore fallback: look for a user doc that has githubRepos snapshot
+        (async () => {
+          try {
+            const fallback = await fetchReposFromFirestoreOwner(o)
+            if (fallback && Object.keys(fallback).length) {
+              console.debug('profileWidgets: using Firestore fallback for', o)
+              renderInto(container, fallback, widgets)
+            } else {
+              renderEmpty(container)
+            }
+          } catch (e) {
+            console.warn('profileWidgets: firestore fallback failed', e)
+            renderEmpty(container)
+          }
+        })();
+        return
       }
       const val = snap.val()
       console.debug('profileWidgets: snapshot value for', o, '=', val)
@@ -127,6 +218,22 @@ export function mountGitHubWidgets(containerId, uidParam) {
       console.warn('profileWidgets: RTDB onValue error for', o, err)
       renderEmpty(container)
     })
+  }
+
+  // Firestore fallback: query users collection for a doc whose githubOwner matches
+  async function fetchReposFromFirestoreOwner(owner) {
+    try {
+      const q = query(collection(fs, 'users'), where('githubOwner', '==', owner));
+      const snaps = await getDocs(q);
+      for (const d of snaps.docs) {
+        const data = d.data();
+        if (data && data.githubRepos) return data.githubRepos;
+      }
+      return null;
+    } catch (e) {
+      console.warn('fetchReposFromFirestoreOwner error', e);
+      return null;
+    }
   }
 
   if (owner) {
